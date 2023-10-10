@@ -1,0 +1,1993 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="css/leaflet.css">
+        <link rel="stylesheet" href="css/qgis2web.css"><link rel="stylesheet" href="css/fontawesome-all.min.css">
+        <link rel="stylesheet" href="css/leaflet-search.css">
+        <link rel="stylesheet" href="css/filter.css">
+<link rel="stylesheet" href="css/nouislider.min.css">
+        <link rel="stylesheet" href="css/leaflet-control-geocoder.Geocoder.css">
+        <style>
+        html, body, #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        </style>
+        <title></title>
+    </head>
+    <body>
+        <div id="map">
+        </div>
+        <script src="js/qgis2web_expressions.js"></script>
+        <script src="js/leaflet.js"></script>
+        <script src="js/leaflet.rotatedMarker.js"></script>
+        <script src="js/leaflet.pattern.js"></script>
+        <script src="js/leaflet-hash.js"></script>
+        <script src="js/Autolinker.min.js"></script>
+        <script src="js/rbush.min.js"></script>
+        <script src="js/labelgun.min.js"></script>
+        <script src="js/labels.js"></script>
+        <script src="js/leaflet-control-geocoder.Geocoder.js"></script>
+        <script src="js/leaflet-search.js"></script>
+        <script src="js/tailDT.js"></script>
+<script src="js/nouislider.min.js"></script>
+<script src="js/wNumb.js"></script>
+        <script src="data/communes_1.js"></script>
+        <script src="data/FoncierGAO_Conventiondemobilisation_2.js"></script>
+        <script>
+        var highlightLayer;
+        function highlightFeature(e) {
+            highlightLayer = e.target;
+
+            if (e.target.feature.geometry.type === 'LineString') {
+              highlightLayer.setStyle({
+                color: '#ffff00',
+              });
+            } else {
+              highlightLayer.setStyle({
+                fillColor: '#ffff00',
+                fillOpacity: 1
+              });
+            }
+        }
+        var map = L.map('map', {
+            zoomControl:true, maxZoom:28, minZoom:1
+        })
+        var hash = new L.Hash(map);
+        map.attributionControl.setPrefix('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
+        var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+        var bounds_group = new L.featureGroup([]);
+        function setBounds() {
+            if (bounds_group.getLayers().length) {
+                map.fitBounds(bounds_group.getBounds());
+            }
+            map.setMaxBounds(map.getBounds());
+        }
+        map.createPane('pane_imagesatellite_0');
+        map.getPane('pane_imagesatellite_0').style.zIndex = 400;
+        var layer_imagesatellite_0 = L.tileLayer('https://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', {
+            pane: 'pane_imagesatellite_0',
+            opacity: 1.0,
+            attribution: '',
+            minZoom: 1,
+            maxZoom: 28,
+            minNativeZoom: 0,
+            maxNativeZoom: 18
+        });
+        layer_imagesatellite_0;
+        map.addLayer(layer_imagesatellite_0);
+        function pop_communes_1(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Type de la commune</th>\
+                        <td>' + (feature.properties['Type_Commu'] !== null ? autolinker.link(feature.properties['Type_Commu'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Code de la commune</th>\
+                        <td>' + (feature.properties['Code_Commu'] !== null ? autolinker.link(feature.properties['Code_Commu'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Nom de la commune en Français</th>\
+                        <td>' + (feature.properties['Nom_Commun'] !== null ? autolinker.link(feature.properties['Nom_Commun'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Nom de la commune en Arabe</th>\
+                        <td>' + (feature.properties['Nom_Comm_1'] !== null ? autolinker.link(feature.properties['Nom_Comm_1'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Code de la proviance d\'appartenance</th>\
+                        <td>' + (feature.properties['Code_Provi'] !== null ? autolinker.link(feature.properties['Code_Provi'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Code de la région d\'appartenance</th>\
+                        <td>' + (feature.properties['CODE_REGIO'] !== null ? autolinker.link(feature.properties['CODE_REGIO'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_communes_1_0() {
+            return {
+                pane: 'pane_communes_1',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(152,125,183,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_communes_1');
+        map.getPane('pane_communes_1').style.zIndex = 401;
+        map.getPane('pane_communes_1').style['mix-blend-mode'] = 'normal';
+        var layer_communes_1 = new L.geoJson(json_communes_1, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_communes_1',
+            layerName: 'layer_communes_1',
+            pane: 'pane_communes_1',
+            onEachFeature: pop_communes_1,
+            style: style_communes_1_0,
+        });
+        bounds_group.addLayer(layer_communes_1);
+        map.addLayer(layer_communes_1);
+        function pop_FoncierGAO_Conventiondemobilisation_2(feature, layer) {
+            layer.on({
+                mouseout: function(e) {
+                    for (i in e.target._eventParents) {
+                        e.target._eventParents[i].resetStyle(e.target);
+                    }
+                },
+                mouseover: highlightFeature,
+            });
+            var popupContent = '<table>\
+                    <tr>\
+                        <th scope="row">Année de convention</th>\
+                        <td>' + (feature.properties['An. Conv'] !== null ? autolinker.link(feature.properties['An. Conv'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Filiale</th>\
+                        <td>' + (feature.properties['Filiale'] !== null ? autolinker.link(feature.properties['Filiale'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Projet</th>\
+                        <td>' + (feature.properties['Projet'] !== null ? autolinker.link(feature.properties['Projet'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Réference fonciére</th>\
+                        <td>' + (feature.properties['Réf. Fon'] !== null ? autolinker.link(feature.properties['Réf. Fon'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Localisation</th>\
+                        <td>' + (feature.properties['Localisati'] !== null ? autolinker.link(feature.properties['Localisati'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Superficie conventionnée</th>\
+                        <td>' + (feature.properties['Sup Conv'] !== null ? autolinker.link(feature.properties['Sup Conv'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Valeur</th>\
+                        <td>' + (feature.properties['Valeur'] !== null ? autolinker.link(feature.properties['Valeur'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Superficie Acquise</th>\
+                        <td>' + (feature.properties['S Acqui'] !== null ? autolinker.link(feature.properties['S Acqui'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Montant réglé</th>\
+                        <td>' + (feature.properties['M.Regle'] !== null ? autolinker.link(feature.properties['M.Regle'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Superficie à acquérir</th>\
+                        <td>' + (feature.properties['Sup à Acq'] !== null ? autolinker.link(feature.properties['Sup à Acq'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Reste à payer</th>\
+                        <td>' + (feature.properties['R.à Payer'] !== null ? autolinker.link(feature.properties['R.à Payer'].toLocaleString()) : '') + '</td>\
+                    </tr>\
+                </table>';
+            layer.bindPopup(popupContent, {maxHeight: 400});
+        }
+
+        function style_FoncierGAO_Conventiondemobilisation_2_0() {
+            return {
+                pane: 'pane_FoncierGAO_Conventiondemobilisation_2',
+                opacity: 1,
+                color: 'rgba(35,35,35,1.0)',
+                dashArray: '',
+                lineCap: 'butt',
+                lineJoin: 'miter',
+                weight: 1.0, 
+                fill: true,
+                fillOpacity: 1,
+                fillColor: 'rgba(231,113,72,1.0)',
+                interactive: true,
+            }
+        }
+        map.createPane('pane_FoncierGAO_Conventiondemobilisation_2');
+        map.getPane('pane_FoncierGAO_Conventiondemobilisation_2').style.zIndex = 402;
+        map.getPane('pane_FoncierGAO_Conventiondemobilisation_2').style['mix-blend-mode'] = 'normal';
+        var layer_FoncierGAO_Conventiondemobilisation_2 = new L.geoJson(json_FoncierGAO_Conventiondemobilisation_2, {
+            attribution: '',
+            interactive: true,
+            dataVar: 'json_FoncierGAO_Conventiondemobilisation_2',
+            layerName: 'layer_FoncierGAO_Conventiondemobilisation_2',
+            pane: 'pane_FoncierGAO_Conventiondemobilisation_2',
+            onEachFeature: pop_FoncierGAO_Conventiondemobilisation_2,
+            style: style_FoncierGAO_Conventiondemobilisation_2_0,
+        });
+        bounds_group.addLayer(layer_FoncierGAO_Conventiondemobilisation_2);
+        map.addLayer(layer_FoncierGAO_Conventiondemobilisation_2);
+            var abstract = new L.Control({'position':'bottomright'});
+            abstract.onAdd = function (map) {
+                this._div = L.DomUtil.create('div',
+                'leaflet-control abstract');
+                this._div.id = 'abstract'
+
+                    abstract.show();
+                    return this._div;
+                };
+                abstract.show = function () {
+                    this._div.classList.remove("abstract");
+                    this._div.classList.add("abstractUncollapsed");
+                    this._div.innerHTML = 'Cette carte represente l\'assiette fonciére du GAO acquise dans le cadre de la convention de mobilisation, Tranche 1, 2 et 3<br />Les parcelles représentées sont associées à leurs informations attributaire ainsi que leurs documents fonciers.';
+            };
+            abstract.addTo(map);
+        var osmGeocoder = new L.Control.Geocoder({
+            collapsed: true,
+            position: 'topleft',
+            text: 'Search',
+            title: 'Testing'
+        }).addTo(map);
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .className += ' fa fa-search';
+        document.getElementsByClassName('leaflet-control-geocoder-icon')[0]
+        .title += 'Search for a place';
+        var baseMaps = {};
+        L.control.layers(baseMaps,{'<img src="legend/FoncierGAO_Conventiondemobilisation_2.png" /> Foncier GAO_Convention de mobilisation': layer_FoncierGAO_Conventiondemobilisation_2,'<img src="legend/communes_1.png" /> communes': layer_communes_1,"image satellite": layer_imagesatellite_0,}).addTo(map);
+        setBounds();
+        map.addControl(new L.Control.Search({
+            layer: layer_FoncierGAO_Conventiondemobilisation_2,
+            initial: false,
+            hideMarkerOnCollapse: true,
+            propertyName: 'Projet'}));
+        document.getElementsByClassName('search-button')[0].className +=
+         ' fa fa-binoculars';
+        var mapDiv = document.getElementById('map');
+        var row = document.createElement('div');
+        row.className="row";
+        row.id="all";
+        row.style.height = "100%";
+        var col1 = document.createElement('div');
+        col1.className="col9";
+        col1.id = "mapWindow";
+        col1.style.height = "99%";
+        col1.style.width = "80%";
+        col1.style.display = "inline-block";
+        var col2 = document.createElement('div');
+        col2.className="col3";
+        col2.id = "menu";
+        col2.style.display = "inline-block";
+        mapDiv.parentNode.insertBefore(row, mapDiv);
+        document.getElementById("all").appendChild(col1);
+        document.getElementById("all").appendChild(col2);
+        col1.appendChild(mapDiv)
+        var Filters = {"An. Conv": "str","Filiale": "str","Code_Commu": "str"};
+        function filterFunc() {
+          map.eachLayer(function(lyr){
+          if ("options" in lyr && "dataVar" in lyr["options"]){
+            features = this[lyr["options"]["dataVar"]].features.slice(0);
+            try{
+              for (key in Filters){
+                keyS = key.replace(/[^a-zA-Z0-9_]/g, "")
+                if (Filters[key] == "str" || Filters[key] == "bool"){
+                  var selection = [];
+                  var options = document.getElementById("sel_" + keyS).options
+                  for (var i=0; i < options.length; i++) {
+                    if (options[i].selected) selection.push(options[i].value);
+                  }
+                    try{
+                      if (key in features[0].properties){
+                        for (i = features.length - 1;
+                          i >= 0; --i){
+                          if (selection.indexOf(
+                          features[i].properties[key])<0
+                          && selection.length>0) {
+                          features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                  }
+                }
+                if (Filters[key] == "int"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (parseInt(features[i].properties[key])
+                          < sliderVals[0]
+                          || parseInt(features[i].properties[key])
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "real"){
+                  sliderVals =  document.getElementById(
+                    "div_" + keyS).noUiSlider.get();
+                  try{
+                    if (key in features[0].properties){
+                    for (i = features.length - 1; i >= 0; --i){
+                      if (features[i].properties[key]
+                          < sliderVals[0]
+                          || features[i].properties[key]
+                          > sliderVals[1]){
+                            features.splice(i,1);
+                          }
+                        }
+                      }
+                    } catch(err){
+                    }
+                  }
+                if (Filters[key] == "date"
+                  || Filters[key] == "datetime"
+                  || Filters[key] == "time"){
+                  try{
+                    if (key in features[0].properties){
+                      HTMLkey = key.replace(/[&\/\\#,+()$~%.'":*?<>{} ]/g, '');
+                      startdate = document.getElementById("dat_" +
+                        HTMLkey + "_date1").value.replace(" ", "T");
+                      enddate = document.getElementById("dat_" +
+                        HTMLkey + "_date2").value.replace(" ", "T");
+                      for (i = features.length - 1; i >= 0; --i){
+                        if (features[i].properties[key] < startdate
+                          || features[i].properties[key] > enddate){
+                          features.splice(i,1);
+                        }
+                      }
+                    }
+                  } catch(err){
+                  }
+                }
+              }
+            } catch(err){
+            }
+          this[lyr["options"]["layerName"]].clearLayers();
+          this[lyr["options"]["layerName"]].addData(features);
+          }
+          })
+        }
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_AnConv = document.createElement('div');
+            div_AnConv.id = "div_AnConv";
+            div_AnConv.className= "filterselect";
+            document.getElementById("menu").appendChild(div_AnConv);
+            sel_AnConv = document.createElement('select');
+            sel_AnConv.multiple = true;
+            sel_AnConv.size = 4;
+            sel_AnConv.id = "sel_AnConv";
+            var AnConv_options_str = "<option value='' unselected></option>";
+            sel_AnConv.onchange = function(){filterFunc()};
+            AnConv_options_str  += '<option value="2003">2003</option>';
+            AnConv_options_str  += '<option value="2007">2007</option>';
+            AnConv_options_str  += '<option value="2008">2008</option>';
+            AnConv_options_str  += '<option value="2009">2009</option>';
+            sel_AnConv.innerHTML = AnConv_options_str;
+            div_AnConv.appendChild(sel_AnConv);
+            var lab_AnConv = document.createElement('div');
+            lab_AnConv.innerHTML = 'Année de Convention';
+            lab_AnConv.className = 'filterlabel';
+            div_AnConv.appendChild(lab_AnConv);
+            var reset_AnConv = document.createElement('div');
+            reset_AnConv.innerHTML = 'Eliminer le filtre';
+            reset_AnConv.className = 'filterlabel';
+            reset_AnConv.onclick = function() {
+                var options = document.getElementById("sel_AnConv").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_AnConv.appendChild(reset_AnConv);
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_Filiale = document.createElement('div');
+            div_Filiale.id = "div_Filiale";
+            div_Filiale.className= "filterselect";
+            document.getElementById("menu").appendChild(div_Filiale);
+            sel_Filiale = document.createElement('select');
+            sel_Filiale.multiple = true;
+            sel_Filiale.size = 10;
+            sel_Filiale.id = "sel_Filiale";
+            var Filiale_options_str = "<option value='' unselected></option>";
+            sel_Filiale.onchange = function(){filterFunc()};
+            Filiale_options_str  += '<option value="Agadir">Agadir</option>';
+            Filiale_options_str  += '<option value="Al Boughaz">Al Boughaz</option>';
+            Filiale_options_str  += '<option value="Béni mellal">Béni mellal</option>';
+            Filiale_options_str  += '<option value="Casablanca">Casablanca</option>';
+            Filiale_options_str  += '<option value="Fès">Fès</option>';
+            Filiale_options_str  += '<option value="Marrakech">Marrakech</option>';
+            Filiale_options_str  += '<option value="Meknes">Meknes</option>';
+            Filiale_options_str  += '<option value="Oujda">Oujda</option>';
+            Filiale_options_str  += '<option value="Rabat">Rabat</option>';
+            Filiale_options_str  += '<option value="Sahel Lakhyayta">Sahel Lakhyayta</option>';
+            Filiale_options_str  += '<option value="Tamensourt">Tamensourt</option>';
+            Filiale_options_str  += '<option value="Tamesna">Tamesna</option>';
+            sel_Filiale.innerHTML = Filiale_options_str;
+            div_Filiale.appendChild(sel_Filiale);
+            var lab_Filiale = document.createElement('div');
+            lab_Filiale.innerHTML = 'Filiale';
+            lab_Filiale.className = 'filterlabel';
+            div_Filiale.appendChild(lab_Filiale);
+            var reset_Filiale = document.createElement('div');
+            reset_Filiale.innerHTML = 'Eliminer le filtre';
+            reset_Filiale.className = 'filterlabel';
+            reset_Filiale.onclick = function() {
+                var options = document.getElementById("sel_Filiale").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_Filiale.appendChild(reset_Filiale);
+            document.getElementById("menu").appendChild(
+                document.createElement("div"));
+            var div_Code_Commu = document.createElement('div');
+            div_Code_Commu.id = "div_Code_Commu";
+            div_Code_Commu.className= "filterselect";
+            document.getElementById("menu").appendChild(div_Code_Commu);
+            sel_Code_Commu = document.createElement('select');
+            sel_Code_Commu.multiple = true;
+            sel_Code_Commu.size = 10;
+            sel_Code_Commu.id = "sel_Code_Commu";
+            var Code_Commu_options_str = "<option value='' unselected></option>";
+            sel_Code_Commu.onchange = function(){filterFunc()};
+            Code_Commu_options_str  += '<option value="NULL">NULL</option>';
+            Code_Commu_options_str  += '<option value="01.051.01.01.">01.051.01.01.</option>';
+            Code_Commu_options_str  += '<option value="01.051.01.03.">01.051.01.03.</option>';
+            Code_Commu_options_str  += '<option value="01.051.01.05.">01.051.01.05.</option>';
+            Code_Commu_options_str  += '<option value="01.051.01.07.">01.051.01.07.</option>';
+            Code_Commu_options_str  += '<option value="01.051.01.09.">01.051.01.09.</option>';
+            Code_Commu_options_str  += '<option value="01.051.03.01.">01.051.03.01.</option>';
+            Code_Commu_options_str  += '<option value="01.051.03.03.">01.051.03.03.</option>';
+            Code_Commu_options_str  += '<option value="01.051.03.05.">01.051.03.05.</option>';
+            Code_Commu_options_str  += '<option value="01.051.03.07.">01.051.03.07.</option>';
+            Code_Commu_options_str  += '<option value="01.051.05.01.">01.051.05.01.</option>';
+            Code_Commu_options_str  += '<option value="01.051.05.03.">01.051.05.03.</option>';
+            Code_Commu_options_str  += '<option value="01.051.05.05.">01.051.05.05.</option>';
+            Code_Commu_options_str  += '<option value="01.051.05.07.">01.051.05.07.</option>';
+            Code_Commu_options_str  += '<option value="01.051.05.09.">01.051.05.09.</option>';
+            Code_Commu_options_str  += '<option value="01.051.05.11.">01.051.05.11.</option>';
+            Code_Commu_options_str  += '<option value="01.051.05.13.">01.051.05.13.</option>';
+            Code_Commu_options_str  += '<option value="01.051.05.15.">01.051.05.15.</option>';
+            Code_Commu_options_str  += '<option value="01.051.05.17.">01.051.05.17.</option>';
+            Code_Commu_options_str  += '<option value="01.051.05.19.">01.051.05.19.</option>';
+            Code_Commu_options_str  += '<option value="01.051.05.21.">01.051.05.21.</option>';
+            Code_Commu_options_str  += '<option value="01.051.05.23.">01.051.05.23.</option>';
+            Code_Commu_options_str  += '<option value="01.051.05.25.">01.051.05.25.</option>';
+            Code_Commu_options_str  += '<option value="01.051.07.03.">01.051.07.03.</option>';
+            Code_Commu_options_str  += '<option value="01.051.07.05.">01.051.07.05.</option>';
+            Code_Commu_options_str  += '<option value="01.051.07.07.">01.051.07.07.</option>';
+            Code_Commu_options_str  += '<option value="01.051.07.11.">01.051.07.11.</option>';
+            Code_Commu_options_str  += '<option value="01.051.07.19.">01.051.07.19.</option>';
+            Code_Commu_options_str  += '<option value="01.051.07.21.">01.051.07.21.</option>';
+            Code_Commu_options_str  += '<option value="01.051.07.27.">01.051.07.27.</option>';
+            Code_Commu_options_str  += '<option value="01.051.09.01.">01.051.09.01.</option>';
+            Code_Commu_options_str  += '<option value="01.051.09.09.">01.051.09.09.</option>';
+            Code_Commu_options_str  += '<option value="01.051.09.13.">01.051.09.13.</option>';
+            Code_Commu_options_str  += '<option value="01.051.09.15.">01.051.09.15.</option>';
+            Code_Commu_options_str  += '<option value="01.051.09.17.">01.051.09.17.</option>';
+            Code_Commu_options_str  += '<option value="01.051.09.23.">01.051.09.23.</option>';
+            Code_Commu_options_str  += '<option value="01.051.09.25.">01.051.09.25.</option>';
+            Code_Commu_options_str  += '<option value="01.151.01.01.">01.151.01.01.</option>';
+            Code_Commu_options_str  += '<option value="01.151.03.03.">01.151.03.03.</option>';
+            Code_Commu_options_str  += '<option value="01.151.03.13.">01.151.03.13.</option>';
+            Code_Commu_options_str  += '<option value="01.151.03.23.">01.151.03.23.</option>';
+            Code_Commu_options_str  += '<option value="01.151.05.01.">01.151.05.01.</option>';
+            Code_Commu_options_str  += '<option value="01.151.05.03.">01.151.05.03.</option>';
+            Code_Commu_options_str  += '<option value="01.151.05.05.">01.151.05.05.</option>';
+            Code_Commu_options_str  += '<option value="01.151.05.07.">01.151.05.07.</option>';
+            Code_Commu_options_str  += '<option value="01.151.05.09.">01.151.05.09.</option>';
+            Code_Commu_options_str  += '<option value="01.151.05.11.">01.151.05.11.</option>';
+            Code_Commu_options_str  += '<option value="01.151.05.13.">01.151.05.13.</option>';
+            Code_Commu_options_str  += '<option value="01.151.05.15.">01.151.05.15.</option>';
+            Code_Commu_options_str  += '<option value="01.151.06.05.">01.151.06.05.</option>';
+            Code_Commu_options_str  += '<option value="01.151.06.07.">01.151.06.07.</option>';
+            Code_Commu_options_str  += '<option value="01.151.06.15.">01.151.06.15.</option>';
+            Code_Commu_options_str  += '<option value="01.151.06.21.">01.151.06.21.</option>';
+            Code_Commu_options_str  += '<option value="01.151.07.01.">01.151.07.01.</option>';
+            Code_Commu_options_str  += '<option value="01.151.07.03.">01.151.07.03.</option>';
+            Code_Commu_options_str  += '<option value="01.151.07.05.">01.151.07.05.</option>';
+            Code_Commu_options_str  += '<option value="01.151.07.07.">01.151.07.07.</option>';
+            Code_Commu_options_str  += '<option value="01.151.07.09.">01.151.07.09.</option>';
+            Code_Commu_options_str  += '<option value="01.151.07.11.">01.151.07.11.</option>';
+            Code_Commu_options_str  += '<option value="01.151.07.13.">01.151.07.13.</option>';
+            Code_Commu_options_str  += '<option value="01.151.09.01.">01.151.09.01.</option>';
+            Code_Commu_options_str  += '<option value="01.151.09.09.">01.151.09.09.</option>';
+            Code_Commu_options_str  += '<option value="01.151.09.11.">01.151.09.11.</option>';
+            Code_Commu_options_str  += '<option value="01.151.09.17.">01.151.09.17.</option>';
+            Code_Commu_options_str  += '<option value="01.151.09.19.">01.151.09.19.</option>';
+            Code_Commu_options_str  += '<option value="01.227.03.05.">01.227.03.05.</option>';
+            Code_Commu_options_str  += '<option value="01.227.03.11.">01.227.03.11.</option>';
+            Code_Commu_options_str  += '<option value="01.227.03.13.">01.227.03.13.</option>';
+            Code_Commu_options_str  += '<option value="01.227.03.21.">01.227.03.21.</option>';
+            Code_Commu_options_str  += '<option value="01.227.05.01.">01.227.05.01.</option>';
+            Code_Commu_options_str  += '<option value="01.227.05.05.">01.227.05.05.</option>';
+            Code_Commu_options_str  += '<option value="01.227.05.09.">01.227.05.09.</option>';
+            Code_Commu_options_str  += '<option value="01.331.01.01.">01.331.01.01.</option>';
+            Code_Commu_options_str  += '<option value="01.331.01.03.">01.331.01.03.</option>';
+            Code_Commu_options_str  += '<option value="01.331.07.01.">01.331.07.01.</option>';
+            Code_Commu_options_str  += '<option value="01.331.07.03.">01.331.07.03.</option>';
+            Code_Commu_options_str  += '<option value="01.331.07.05.">01.331.07.05.</option>';
+            Code_Commu_options_str  += '<option value="01.331.07.11.">01.331.07.11.</option>';
+            Code_Commu_options_str  += '<option value="01.331.07.15.">01.331.07.15.</option>';
+            Code_Commu_options_str  += '<option value="01.331.07.17.">01.331.07.17.</option>';
+            Code_Commu_options_str  += '<option value="01.331.09.01.">01.331.09.01.</option>';
+            Code_Commu_options_str  += '<option value="01.331.09.03.">01.331.09.03.</option>';
+            Code_Commu_options_str  += '<option value="01.331.09.05.">01.331.09.05.</option>';
+            Code_Commu_options_str  += '<option value="01.331.09.13.">01.331.09.13.</option>';
+            Code_Commu_options_str  += '<option value="01.331.09.15.">01.331.09.15.</option>';
+            Code_Commu_options_str  += '<option value="01.331.11.03.">01.331.11.03.</option>';
+            Code_Commu_options_str  += '<option value="01.331.11.07.">01.331.11.07.</option>';
+            Code_Commu_options_str  += '<option value="01.331.11.09.">01.331.11.09.</option>';
+            Code_Commu_options_str  += '<option value="01.331.11.11.">01.331.11.11.</option>';
+            Code_Commu_options_str  += '<option value="01.331.11.12.">01.331.11.12.</option>';
+            Code_Commu_options_str  += '<option value="01.331.11.13.">01.331.11.13.</option>';
+            Code_Commu_options_str  += '<option value="01.405.01.09.">01.405.01.09.</option>';
+            Code_Commu_options_str  += '<option value="01.405.07.01.">01.405.07.01.</option>';
+            Code_Commu_options_str  += '<option value="01.405.07.03.">01.405.07.03.</option>';
+            Code_Commu_options_str  += '<option value="01.405.07.05.">01.405.07.05.</option>';
+            Code_Commu_options_str  += '<option value="01.405.07.07.">01.405.07.07.</option>';
+            Code_Commu_options_str  += '<option value="01.405.07.09.">01.405.07.09.</option>';
+            Code_Commu_options_str  += '<option value="01.405.07.11.">01.405.07.11.</option>';
+            Code_Commu_options_str  += '<option value="01.405.07.13.">01.405.07.13.</option>';
+            Code_Commu_options_str  += '<option value="01.405.07.15.">01.405.07.15.</option>';
+            Code_Commu_options_str  += '<option value="01.405.07.17.">01.405.07.17.</option>';
+            Code_Commu_options_str  += '<option value="01.405.07.19.">01.405.07.19.</option>';
+            Code_Commu_options_str  += '<option value="01.405.09.01.">01.405.09.01.</option>';
+            Code_Commu_options_str  += '<option value="01.405.09.03.">01.405.09.03.</option>';
+            Code_Commu_options_str  += '<option value="01.405.09.05.">01.405.09.05.</option>';
+            Code_Commu_options_str  += '<option value="01.405.09.09.">01.405.09.09.</option>';
+            Code_Commu_options_str  += '<option value="01.405.11.07.">01.405.11.07.</option>';
+            Code_Commu_options_str  += '<option value="01.405.11.11.">01.405.11.11.</option>';
+            Code_Commu_options_str  += '<option value="01.511.00.01.">01.511.00.01.</option>';
+            Code_Commu_options_str  += '<option value="01.511.01.01.">01.511.01.01.</option>';
+            Code_Commu_options_str  += '<option value="01.511.01.09.">01.511.01.09.</option>';
+            Code_Commu_options_str  += '<option value="01.511.03.01.">01.511.03.01.</option>';
+            Code_Commu_options_str  += '<option value="01.511.03.03.">01.511.03.03.</option>';
+            Code_Commu_options_str  += '<option value="01.511.03.05.">01.511.03.05.</option>';
+            Code_Commu_options_str  += '<option value="01.511.03.07.">01.511.03.07.</option>';
+            Code_Commu_options_str  += '<option value="01.511.03.11.">01.511.03.11.</option>';
+            Code_Commu_options_str  += '<option value="01.511.03.13.">01.511.03.13.</option>';
+            Code_Commu_options_str  += '<option value="01.511.03.15.">01.511.03.15.</option>';
+            Code_Commu_options_str  += '<option value="01.511.03.17.">01.511.03.17.</option>';
+            Code_Commu_options_str  += '<option value="01.511.81.05.">01.511.81.05.</option>';
+            Code_Commu_options_str  += '<option value="01.571.01.07.">01.571.01.07.</option>';
+            Code_Commu_options_str  += '<option value="01.571.01.11.">01.571.01.11.</option>';
+            Code_Commu_options_str  += '<option value="01.571.03.01.">01.571.03.01.</option>';
+            Code_Commu_options_str  += '<option value="01.571.03.03.">01.571.03.03.</option>';
+            Code_Commu_options_str  += '<option value="01.571.03.05.">01.571.03.05.</option>';
+            Code_Commu_options_str  += '<option value="01.571.03.07.">01.571.03.07.</option>';
+            Code_Commu_options_str  += '<option value="01.571.03.09.">01.571.03.09.</option>';
+            Code_Commu_options_str  += '<option value="01.571.03.11.">01.571.03.11.</option>';
+            Code_Commu_options_str  += '<option value="01.571.03.15.">01.571.03.15.</option>';
+            Code_Commu_options_str  += '<option value="01.571.03.17.">01.571.03.17.</option>';
+            Code_Commu_options_str  += '<option value="01.571.03.19.">01.571.03.19.</option>';
+            Code_Commu_options_str  += '<option value="01.571.03.21.">01.571.03.21.</option>';
+            Code_Commu_options_str  += '<option value="01.571.05.01.">01.571.05.01.</option>';
+            Code_Commu_options_str  += '<option value="01.571.05.05.">01.571.05.05.</option>';
+            Code_Commu_options_str  += '<option value="01.571.05.07.">01.571.05.07.</option>';
+            Code_Commu_options_str  += '<option value="01.571.05.13.">01.571.05.13.</option>';
+            Code_Commu_options_str  += '<option value="01.571.05.15.">01.571.05.15.</option>';
+            Code_Commu_options_str  += '<option value="01.571.05.17.">01.571.05.17.</option>';
+            Code_Commu_options_str  += '<option value="01.571.05.19.">01.571.05.19.</option>';
+            Code_Commu_options_str  += '<option value="01.571.05.23.">01.571.05.23.</option>';
+            Code_Commu_options_str  += '<option value="01.571.05.25.">01.571.05.25.</option>';
+            Code_Commu_options_str  += '<option value="01.571.05.27.">01.571.05.27.</option>';
+            Code_Commu_options_str  += '<option value="01.573.01.01.">01.573.01.01.</option>';
+            Code_Commu_options_str  += '<option value="01.573.01.03.">01.573.01.03.</option>';
+            Code_Commu_options_str  += '<option value="01.573.01.05.">01.573.01.05.</option>';
+            Code_Commu_options_str  += '<option value="01.573.03.03.">01.573.03.03.</option>';
+            Code_Commu_options_str  += '<option value="01.573.03.05.">01.573.03.05.</option>';
+            Code_Commu_options_str  += '<option value="02.113.01.01.">02.113.01.01.</option>';
+            Code_Commu_options_str  += '<option value="02.113.01.05.">02.113.01.05.</option>';
+            Code_Commu_options_str  += '<option value="02.113.01.07.">02.113.01.07.</option>';
+            Code_Commu_options_str  += '<option value="02.113.01.09.">02.113.01.09.</option>';
+            Code_Commu_options_str  += '<option value="02.113.01.25.">02.113.01.25.</option>';
+            Code_Commu_options_str  += '<option value="02.113.01.29.">02.113.01.29.</option>';
+            Code_Commu_options_str  += '<option value="02.113.03.01.">02.113.03.01.</option>';
+            Code_Commu_options_str  += '<option value="02.113.03.07.">02.113.03.07.</option>';
+            Code_Commu_options_str  += '<option value="02.113.03.09.">02.113.03.09.</option>';
+            Code_Commu_options_str  += '<option value="02.113.03.11.">02.113.03.11.</option>';
+            Code_Commu_options_str  += '<option value="02.113.05.03.">02.113.05.03.</option>';
+            Code_Commu_options_str  += '<option value="02.113.05.05.">02.113.05.05.</option>';
+            Code_Commu_options_str  += '<option value="02.113.05.13.">02.113.05.13.</option>';
+            Code_Commu_options_str  += '<option value="02.113.05.15.">02.113.05.15.</option>';
+            Code_Commu_options_str  += '<option value="02.113.05.17.">02.113.05.17.</option>';
+            Code_Commu_options_str  += '<option value="02.113.05.19.">02.113.05.19.</option>';
+            Code_Commu_options_str  += '<option value="02.167.01.03.">02.167.01.03.</option>';
+            Code_Commu_options_str  += '<option value="02.167.01.09.">02.167.01.09.</option>';
+            Code_Commu_options_str  += '<option value="02.167.01.13.">02.167.01.13.</option>';
+            Code_Commu_options_str  += '<option value="02.167.03.01.">02.167.03.01.</option>';
+            Code_Commu_options_str  += '<option value="02.167.03.03.">02.167.03.03.</option>';
+            Code_Commu_options_str  += '<option value="02.167.03.05.">02.167.03.05.</option>';
+            Code_Commu_options_str  += '<option value="02.167.03.07.">02.167.03.07.</option>';
+            Code_Commu_options_str  += '<option value="02.167.03.09.">02.167.03.09.</option>';
+            Code_Commu_options_str  += '<option value="02.167.03.11.">02.167.03.11.</option>';
+            Code_Commu_options_str  += '<option value="02.167.03.13.">02.167.03.13.</option>';
+            Code_Commu_options_str  += '<option value="02.167.09.01.">02.167.09.01.</option>';
+            Code_Commu_options_str  += '<option value="02.167.09.05.">02.167.09.05.</option>';
+            Code_Commu_options_str  += '<option value="02.167.09.07.">02.167.09.07.</option>';
+            Code_Commu_options_str  += '<option value="02.167.09.09.">02.167.09.09.</option>';
+            Code_Commu_options_str  += '<option value="02.167.09.11.">02.167.09.11.</option>';
+            Code_Commu_options_str  += '<option value="02.167.09.15.">02.167.09.15.</option>';
+            Code_Commu_options_str  += '<option value="02.167.09.17.">02.167.09.17.</option>';
+            Code_Commu_options_str  += '<option value="02.167.09.19.">02.167.09.19.</option>';
+            Code_Commu_options_str  += '<option value="02.167.09.21.">02.167.09.21.</option>';
+            Code_Commu_options_str  += '<option value="02.167.09.23.">02.167.09.23.</option>';
+            Code_Commu_options_str  += '<option value="02.167.09.25.">02.167.09.25.</option>';
+            Code_Commu_options_str  += '<option value="02.167.09.27.">02.167.09.27.</option>';
+            Code_Commu_options_str  += '<option value="02.167.09.29.">02.167.09.29.</option>';
+            Code_Commu_options_str  += '<option value="02.251.01.01.">02.251.01.01.</option>';
+            Code_Commu_options_str  += '<option value="02.251.01.03.">02.251.01.03.</option>';
+            Code_Commu_options_str  += '<option value="02.251.03.01.">02.251.03.01.</option>';
+            Code_Commu_options_str  += '<option value="02.251.03.03.">02.251.03.03.</option>';
+            Code_Commu_options_str  += '<option value="02.251.03.05.">02.251.03.05.</option>';
+            Code_Commu_options_str  += '<option value="02.251.03.07.">02.251.03.07.</option>';
+            Code_Commu_options_str  += '<option value="02.251.03.09.">02.251.03.09.</option>';
+            Code_Commu_options_str  += '<option value="02.251.03.11.">02.251.03.11.</option>';
+            Code_Commu_options_str  += '<option value="02.251.03.13.">02.251.03.13.</option>';
+            Code_Commu_options_str  += '<option value="02.251.05.01.">02.251.05.01.</option>';
+            Code_Commu_options_str  += '<option value="02.251.05.03.">02.251.05.03.</option>';
+            Code_Commu_options_str  += '<option value="02.251.05.05.">02.251.05.05.</option>';
+            Code_Commu_options_str  += '<option value="02.251.05.07.">02.251.05.07.</option>';
+            Code_Commu_options_str  += '<option value="02.265.01.03.">02.265.01.03.</option>';
+            Code_Commu_options_str  += '<option value="02.265.05.01.">02.265.05.01.</option>';
+            Code_Commu_options_str  += '<option value="02.265.05.03.">02.265.05.03.</option>';
+            Code_Commu_options_str  += '<option value="02.265.05.05.">02.265.05.05.</option>';
+            Code_Commu_options_str  += '<option value="02.265.05.07.">02.265.05.07.</option>';
+            Code_Commu_options_str  += '<option value="02.265.05.15.">02.265.05.15.</option>';
+            Code_Commu_options_str  += '<option value="02.265.07.09.">02.265.07.09.</option>';
+            Code_Commu_options_str  += '<option value="02.265.07.11.">02.265.07.11.</option>';
+            Code_Commu_options_str  += '<option value="02.265.07.13.">02.265.07.13.</option>';
+            Code_Commu_options_str  += '<option value="02.265.07.17.">02.265.07.17.</option>';
+            Code_Commu_options_str  += '<option value="02.275.01.03.">02.275.01.03.</option>';
+            Code_Commu_options_str  += '<option value="02.275.01.17.">02.275.01.17.</option>';
+            Code_Commu_options_str  += '<option value="02.275.01.35.">02.275.01.35.</option>';
+            Code_Commu_options_str  += '<option value="02.275.03.03.">02.275.03.03.</option>';
+            Code_Commu_options_str  += '<option value="02.275.03.05.">02.275.03.05.</option>';
+            Code_Commu_options_str  += '<option value="02.275.03.07.">02.275.03.07.</option>';
+            Code_Commu_options_str  += '<option value="02.275.03.09.">02.275.03.09.</option>';
+            Code_Commu_options_str  += '<option value="02.275.03.13.">02.275.03.13.</option>';
+            Code_Commu_options_str  += '<option value="02.275.03.15.">02.275.03.15.</option>';
+            Code_Commu_options_str  += '<option value="02.275.03.21.">02.275.03.21.</option>';
+            Code_Commu_options_str  += '<option value="02.275.05.01.">02.275.05.01.</option>';
+            Code_Commu_options_str  += '<option value="02.275.05.11.">02.275.05.11.</option>';
+            Code_Commu_options_str  += '<option value="02.275.05.13.">02.275.05.13.</option>';
+            Code_Commu_options_str  += '<option value="02.275.05.15.">02.275.05.15.</option>';
+            Code_Commu_options_str  += '<option value="02.381.01.01.">02.381.01.01.</option>';
+            Code_Commu_options_str  += '<option value="02.381.01.03.">02.381.01.03.</option>';
+            Code_Commu_options_str  += '<option value="02.381.01.05.">02.381.01.05.</option>';
+            Code_Commu_options_str  += '<option value="02.381.01.07.">02.381.01.07.</option>';
+            Code_Commu_options_str  += '<option value="02.381.01.09.">02.381.01.09.</option>';
+            Code_Commu_options_str  += '<option value="02.381.01.15.">02.381.01.15.</option>';
+            Code_Commu_options_str  += '<option value="02.381.01.19.">02.381.01.19.</option>';
+            Code_Commu_options_str  += '<option value="02.381.05.01.">02.381.05.01.</option>';
+            Code_Commu_options_str  += '<option value="02.381.05.03.">02.381.05.03.</option>';
+            Code_Commu_options_str  += '<option value="02.381.05.05.">02.381.05.05.</option>';
+            Code_Commu_options_str  += '<option value="02.381.05.07.">02.381.05.07.</option>';
+            Code_Commu_options_str  += '<option value="02.381.05.09.">02.381.05.09.</option>';
+            Code_Commu_options_str  += '<option value="02.381.05.13.">02.381.05.13.</option>';
+            Code_Commu_options_str  += '<option value="02.381.05.15.">02.381.05.15.</option>';
+            Code_Commu_options_str  += '<option value="02.381.05.17.">02.381.05.17.</option>';
+            Code_Commu_options_str  += '<option value="02.381.07.01.">02.381.07.01.</option>';
+            Code_Commu_options_str  += '<option value="02.381.07.03.">02.381.07.03.</option>';
+            Code_Commu_options_str  += '<option value="02.381.07.05.">02.381.07.05.</option>';
+            Code_Commu_options_str  += '<option value="02.381.07.07.">02.381.07.07.</option>';
+            Code_Commu_options_str  += '<option value="02.381.07.09.">02.381.07.09.</option>';
+            Code_Commu_options_str  += '<option value="02.381.07.11.">02.381.07.11.</option>';
+            Code_Commu_options_str  += '<option value="02.381.07.13.">02.381.07.13.</option>';
+            Code_Commu_options_str  += '<option value="02.381.07.17.">02.381.07.17.</option>';
+            Code_Commu_options_str  += '<option value="02.411.01.11.">02.411.01.11.</option>';
+            Code_Commu_options_str  += '<option value="02.411.01.19.">02.411.01.19.</option>';
+            Code_Commu_options_str  += '<option value="02.411.01.23.">02.411.01.23.</option>';
+            Code_Commu_options_str  += '<option value="02.411.03.01.">02.411.03.01.</option>';
+            Code_Commu_options_str  += '<option value="02.411.03.03.">02.411.03.03.</option>';
+            Code_Commu_options_str  += '<option value="02.411.03.05.">02.411.03.05.</option>';
+            Code_Commu_options_str  += '<option value="02.411.03.07.">02.411.03.07.</option>';
+            Code_Commu_options_str  += '<option value="02.411.05.09.">02.411.05.09.</option>';
+            Code_Commu_options_str  += '<option value="02.411.05.11.">02.411.05.11.</option>';
+            Code_Commu_options_str  += '<option value="02.411.05.17.">02.411.05.17.</option>';
+            Code_Commu_options_str  += '<option value="02.411.05.19.">02.411.05.19.</option>';
+            Code_Commu_options_str  += '<option value="02.533.01.13.">02.533.01.13.</option>';
+            Code_Commu_options_str  += '<option value="02.533.01.15.">02.533.01.15.</option>';
+            Code_Commu_options_str  += '<option value="02.533.01.33.">02.533.01.33.</option>';
+            Code_Commu_options_str  += '<option value="02.533.03.05.">02.533.03.05.</option>';
+            Code_Commu_options_str  += '<option value="02.533.03.15.">02.533.03.15.</option>';
+            Code_Commu_options_str  += '<option value="02.533.03.17.">02.533.03.17.</option>';
+            Code_Commu_options_str  += '<option value="02.533.03.19.">02.533.03.19.</option>';
+            Code_Commu_options_str  += '<option value="02.533.07.03.">02.533.07.03.</option>';
+            Code_Commu_options_str  += '<option value="02.533.07.09.">02.533.07.09.</option>';
+            Code_Commu_options_str  += '<option value="02.533.07.13.">02.533.07.13.</option>';
+            Code_Commu_options_str  += '<option value="02.533.07.21.">02.533.07.21.</option>';
+            Code_Commu_options_str  += '<option value="02.533.09.01.">02.533.09.01.</option>';
+            Code_Commu_options_str  += '<option value="02.533.09.07.">02.533.09.07.</option>';
+            Code_Commu_options_str  += '<option value="02.533.09.11.">02.533.09.11.</option>';
+            Code_Commu_options_str  += '<option value="03.061.01.01.">03.061.01.01.</option>';
+            Code_Commu_options_str  += '<option value="03.061.01.03.">03.061.01.03.</option>';
+            Code_Commu_options_str  += '<option value="03.061.01.05.">03.061.01.05.</option>';
+            Code_Commu_options_str  += '<option value="03.061.01.07.">03.061.01.07.</option>';
+            Code_Commu_options_str  += '<option value="03.061.01.09.">03.061.01.09.</option>';
+            Code_Commu_options_str  += '<option value="03.061.01.11.">03.061.01.11.</option>';
+            Code_Commu_options_str  += '<option value="03.061.03.01.">03.061.03.01.</option>';
+            Code_Commu_options_str  += '<option value="03.061.03.02.">03.061.03.02.</option>';
+            Code_Commu_options_str  += '<option value="03.061.03.05.">03.061.03.05.</option>';
+            Code_Commu_options_str  += '<option value="03.061.03.07.">03.061.03.07.</option>';
+            Code_Commu_options_str  += '<option value="03.061.03.09.">03.061.03.09.</option>';
+            Code_Commu_options_str  += '<option value="03.061.05.01.">03.061.05.01.</option>';
+            Code_Commu_options_str  += '<option value="03.061.05.03.">03.061.05.03.</option>';
+            Code_Commu_options_str  += '<option value="03.061.05.05.">03.061.05.05.</option>';
+            Code_Commu_options_str  += '<option value="03.061.05.07.">03.061.05.07.</option>';
+            Code_Commu_options_str  += '<option value="03.061.05.09.">03.061.05.09.</option>';
+            Code_Commu_options_str  += '<option value="03.061.07.01.">03.061.07.01.</option>';
+            Code_Commu_options_str  += '<option value="03.061.07.05.">03.061.07.05.</option>';
+            Code_Commu_options_str  += '<option value="03.061.07.07.">03.061.07.07.</option>';
+            Code_Commu_options_str  += '<option value="03.061.07.09.">03.061.07.09.</option>';
+            Code_Commu_options_str  += '<option value="03.061.07.11.">03.061.07.11.</option>';
+            Code_Commu_options_str  += '<option value="03.131.01.01.">03.131.01.01.</option>';
+            Code_Commu_options_str  += '<option value="03.131.01.02.">03.131.01.02.</option>';
+            Code_Commu_options_str  += '<option value="03.131.01.03.">03.131.01.03.</option>';
+            Code_Commu_options_str  += '<option value="03.131.01.05.">03.131.01.05.</option>';
+            Code_Commu_options_str  += '<option value="03.131.03.01.">03.131.03.01.</option>';
+            Code_Commu_options_str  += '<option value="03.131.03.03.">03.131.03.03.</option>';
+            Code_Commu_options_str  += '<option value="03.131.03.05.">03.131.03.05.</option>';
+            Code_Commu_options_str  += '<option value="03.131.03.07.">03.131.03.07.</option>';
+            Code_Commu_options_str  += '<option value="03.131.03.09.">03.131.03.09.</option>';
+            Code_Commu_options_str  += '<option value="03.131.03.11.">03.131.03.11.</option>';
+            Code_Commu_options_str  += '<option value="03.131.03.13.">03.131.03.13.</option>';
+            Code_Commu_options_str  += '<option value="03.131.03.15.">03.131.03.15.</option>';
+            Code_Commu_options_str  += '<option value="03.131.03.17.">03.131.03.17.</option>';
+            Code_Commu_options_str  += '<option value="03.131.05.01.">03.131.05.01.</option>';
+            Code_Commu_options_str  += '<option value="03.131.05.03.">03.131.05.03.</option>';
+            Code_Commu_options_str  += '<option value="03.131.05.05.">03.131.05.05.</option>';
+            Code_Commu_options_str  += '<option value="03.131.07.01.">03.131.07.01.</option>';
+            Code_Commu_options_str  += '<option value="03.131.07.03.">03.131.07.03.</option>';
+            Code_Commu_options_str  += '<option value="03.131.07.05.">03.131.07.05.</option>';
+            Code_Commu_options_str  += '<option value="03.131.07.07.">03.131.07.07.</option>';
+            Code_Commu_options_str  += '<option value="03.131.07.09.">03.131.07.09.</option>';
+            Code_Commu_options_str  += '<option value="03.171.01.01.">03.171.01.01.</option>';
+            Code_Commu_options_str  += '<option value="03.171.01.03.">03.171.01.03.</option>';
+            Code_Commu_options_str  += '<option value="03.171.01.05.">03.171.01.05.</option>';
+            Code_Commu_options_str  += '<option value="03.171.01.07.">03.171.01.07.</option>';
+            Code_Commu_options_str  += '<option value="03.171.03.01.">03.171.03.01.</option>';
+            Code_Commu_options_str  += '<option value="03.171.03.03.">03.171.03.03.</option>';
+            Code_Commu_options_str  += '<option value="03.171.03.05.">03.171.03.05.</option>';
+            Code_Commu_options_str  += '<option value="03.171.03.07.">03.171.03.07.</option>';
+            Code_Commu_options_str  += '<option value="03.171.03.09.">03.171.03.09.</option>';
+            Code_Commu_options_str  += '<option value="03.171.05.01.">03.171.05.01.</option>';
+            Code_Commu_options_str  += '<option value="03.171.05.03.">03.171.05.03.</option>';
+            Code_Commu_options_str  += '<option value="03.171.05.05.">03.171.05.05.</option>';
+            Code_Commu_options_str  += '<option value="03.171.05.07.">03.171.05.07.</option>';
+            Code_Commu_options_str  += '<option value="03.171.07.01.">03.171.07.01.</option>';
+            Code_Commu_options_str  += '<option value="03.171.07.03.">03.171.07.03.</option>';
+            Code_Commu_options_str  += '<option value="03.171.07.05.">03.171.07.05.</option>';
+            Code_Commu_options_str  += '<option value="03.231.00.01.">03.231.00.01.</option>';
+            Code_Commu_options_str  += '<option value="03.231.01.03.">03.231.01.03.</option>';
+            Code_Commu_options_str  += '<option value="03.231.81.01.">03.231.81.01.</option>';
+            Code_Commu_options_str  += '<option value="03.231.81.03.">03.231.81.03.</option>';
+            Code_Commu_options_str  += '<option value="03.231.81.05.">03.231.81.05.</option>';
+            Code_Commu_options_str  += '<option value="03.271.01.01.">03.271.01.01.</option>';
+            Code_Commu_options_str  += '<option value="03.271.01.03.">03.271.01.03.</option>';
+            Code_Commu_options_str  += '<option value="03.271.03.01.">03.271.03.01.</option>';
+            Code_Commu_options_str  += '<option value="03.271.03.03.">03.271.03.03.</option>';
+            Code_Commu_options_str  += '<option value="03.271.03.05.">03.271.03.05.</option>';
+            Code_Commu_options_str  += '<option value="03.271.03.07.">03.271.03.07.</option>';
+            Code_Commu_options_str  += '<option value="03.271.03.09.">03.271.03.09.</option>';
+            Code_Commu_options_str  += '<option value="03.271.03.11.">03.271.03.11.</option>';
+            Code_Commu_options_str  += '<option value="03.271.81.01.">03.271.81.01.</option>';
+            Code_Commu_options_str  += '<option value="03.271.81.03.">03.271.81.03.</option>';
+            Code_Commu_options_str  += '<option value="03.451.01.01.">03.451.01.01.</option>';
+            Code_Commu_options_str  += '<option value="03.451.01.03.">03.451.01.03.</option>';
+            Code_Commu_options_str  += '<option value="03.451.01.05.">03.451.01.05.</option>';
+            Code_Commu_options_str  += '<option value="03.451.01.07.">03.451.01.07.</option>';
+            Code_Commu_options_str  += '<option value="03.451.01.09.">03.451.01.09.</option>';
+            Code_Commu_options_str  += '<option value="03.451.03.01.">03.451.03.01.</option>';
+            Code_Commu_options_str  += '<option value="03.451.03.03.">03.451.03.03.</option>';
+            Code_Commu_options_str  += '<option value="03.451.03.05.">03.451.03.05.</option>';
+            Code_Commu_options_str  += '<option value="03.451.03.07.">03.451.03.07.</option>';
+            Code_Commu_options_str  += '<option value="03.451.03.09.">03.451.03.09.</option>';
+            Code_Commu_options_str  += '<option value="03.451.03.11.">03.451.03.11.</option>';
+            Code_Commu_options_str  += '<option value="03.451.03.13.">03.451.03.13.</option>';
+            Code_Commu_options_str  += '<option value="03.451.03.15.">03.451.03.15.</option>';
+            Code_Commu_options_str  += '<option value="03.451.03.17.">03.451.03.17.</option>';
+            Code_Commu_options_str  += '<option value="03.451.05.01.">03.451.05.01.</option>';
+            Code_Commu_options_str  += '<option value="03.451.05.03.">03.451.05.03.</option>';
+            Code_Commu_options_str  += '<option value="03.451.07.01.">03.451.07.01.</option>';
+            Code_Commu_options_str  += '<option value="03.451.07.03.">03.451.07.03.</option>';
+            Code_Commu_options_str  += '<option value="03.451.07.05.">03.451.07.05.</option>';
+            Code_Commu_options_str  += '<option value="03.451.07.07.">03.451.07.07.</option>';
+            Code_Commu_options_str  += '<option value="03.451.07.09.">03.451.07.09.</option>';
+            Code_Commu_options_str  += '<option value="03.451.07.11.">03.451.07.11.</option>';
+            Code_Commu_options_str  += '<option value="03.451.07.13.">03.451.07.13.</option>';
+            Code_Commu_options_str  += '<option value="03.531.01.01.">03.531.01.01.</option>';
+            Code_Commu_options_str  += '<option value="03.531.01.03.">03.531.01.03.</option>';
+            Code_Commu_options_str  += '<option value="03.531.01.05.">03.531.01.05.</option>';
+            Code_Commu_options_str  += '<option value="03.531.01.07.">03.531.01.07.</option>';
+            Code_Commu_options_str  += '<option value="03.531.01.09.">03.531.01.09.</option>';
+            Code_Commu_options_str  += '<option value="03.531.03.01.">03.531.03.01.</option>';
+            Code_Commu_options_str  += '<option value="03.531.03.03.">03.531.03.03.</option>';
+            Code_Commu_options_str  += '<option value="03.531.03.05.">03.531.03.05.</option>';
+            Code_Commu_options_str  += '<option value="03.531.03.07.">03.531.03.07.</option>';
+            Code_Commu_options_str  += '<option value="03.531.03.09.">03.531.03.09.</option>';
+            Code_Commu_options_str  += '<option value="03.531.03.11.">03.531.03.11.</option>';
+            Code_Commu_options_str  += '<option value="03.531.03.13.">03.531.03.13.</option>';
+            Code_Commu_options_str  += '<option value="03.531.03.15.">03.531.03.15.</option>';
+            Code_Commu_options_str  += '<option value="03.531.03.17.">03.531.03.17.</option>';
+            Code_Commu_options_str  += '<option value="03.531.03.19.">03.531.03.19.</option>';
+            Code_Commu_options_str  += '<option value="03.531.03.21.">03.531.03.21.</option>';
+            Code_Commu_options_str  += '<option value="03.531.03.23.">03.531.03.23.</option>';
+            Code_Commu_options_str  += '<option value="03.531.05.01.">03.531.05.01.</option>';
+            Code_Commu_options_str  += '<option value="03.531.05.03.">03.531.05.03.</option>';
+            Code_Commu_options_str  += '<option value="03.531.05.05.">03.531.05.05.</option>';
+            Code_Commu_options_str  += '<option value="03.531.05.07.">03.531.05.07.</option>';
+            Code_Commu_options_str  += '<option value="03.531.05.09.">03.531.05.09.</option>';
+            Code_Commu_options_str  += '<option value="03.531.05.11.">03.531.05.11.</option>';
+            Code_Commu_options_str  += '<option value="03.531.05.13.">03.531.05.13.</option>';
+            Code_Commu_options_str  += '<option value="03.531.05.15.">03.531.05.15.</option>';
+            Code_Commu_options_str  += '<option value="03.531.05.17.">03.531.05.17.</option>';
+            Code_Commu_options_str  += '<option value="03.531.07.01.">03.531.07.01.</option>';
+            Code_Commu_options_str  += '<option value="03.531.07.03.">03.531.07.03.</option>';
+            Code_Commu_options_str  += '<option value="03.531.07.05.">03.531.07.05.</option>';
+            Code_Commu_options_str  += '<option value="03.531.07.07.">03.531.07.07.</option>';
+            Code_Commu_options_str  += '<option value="03.531.07.09.">03.531.07.09.</option>';
+            Code_Commu_options_str  += '<option value="03.531.07.11.">03.531.07.11.</option>';
+            Code_Commu_options_str  += '<option value="03.531.07.13.">03.531.07.13.</option>';
+            Code_Commu_options_str  += '<option value="03.531.07.15.">03.531.07.15.</option>';
+            Code_Commu_options_str  += '<option value="03.531.07.17.">03.531.07.17.</option>';
+            Code_Commu_options_str  += '<option value="03.531.07.19.">03.531.07.19.</option>';
+            Code_Commu_options_str  += '<option value="03.531.07.21.">03.531.07.21.</option>';
+            Code_Commu_options_str  += '<option value="03.531.09.01.">03.531.09.01.</option>';
+            Code_Commu_options_str  += '<option value="03.531.09.03.">03.531.09.03.</option>';
+            Code_Commu_options_str  += '<option value="03.531.09.05.">03.531.09.05.</option>';
+            Code_Commu_options_str  += '<option value="03.531.09.07.">03.531.09.07.</option>';
+            Code_Commu_options_str  += '<option value="03.531.09.09.">03.531.09.09.</option>';
+            Code_Commu_options_str  += '<option value="03.531.09.11.">03.531.09.11.</option>';
+            Code_Commu_options_str  += '<option value="03.531.09.13.">03.531.09.13.</option>';
+            Code_Commu_options_str  += '<option value="03.531.09.15.">03.531.09.15.</option>';
+            Code_Commu_options_str  += '<option value="03.531.09.17.">03.531.09.17.</option>';
+            Code_Commu_options_str  += '<option value="03.531.09.19.">03.531.09.19.</option>';
+            Code_Commu_options_str  += '<option value="03.531.09.21.">03.531.09.21.</option>';
+            Code_Commu_options_str  += '<option value="03.531.09.23.">03.531.09.23.</option>';
+            Code_Commu_options_str  += '<option value="03.561.01.01.">03.561.01.01.</option>';
+            Code_Commu_options_str  += '<option value="03.561.01.05.">03.561.01.05.</option>';
+            Code_Commu_options_str  += '<option value="03.561.01.07.">03.561.01.07.</option>';
+            Code_Commu_options_str  += '<option value="03.561.01.11.">03.561.01.11.</option>';
+            Code_Commu_options_str  += '<option value="03.561.03.01.">03.561.03.01.</option>';
+            Code_Commu_options_str  += '<option value="03.561.03.03.">03.561.03.03.</option>';
+            Code_Commu_options_str  += '<option value="03.561.03.05.">03.561.03.05.</option>';
+            Code_Commu_options_str  += '<option value="03.561.03.07.">03.561.03.07.</option>';
+            Code_Commu_options_str  += '<option value="03.561.03.09.">03.561.03.09.</option>';
+            Code_Commu_options_str  += '<option value="03.561.03.11.">03.561.03.11.</option>';
+            Code_Commu_options_str  += '<option value="03.561.07.01.">03.561.07.01.</option>';
+            Code_Commu_options_str  += '<option value="03.561.07.03.">03.561.07.03.</option>';
+            Code_Commu_options_str  += '<option value="03.561.07.05.">03.561.07.05.</option>';
+            Code_Commu_options_str  += '<option value="03.561.07.07.">03.561.07.07.</option>';
+            Code_Commu_options_str  += '<option value="03.561.07.09.">03.561.07.09.</option>';
+            Code_Commu_options_str  += '<option value="03.561.07.11.">03.561.07.11.</option>';
+            Code_Commu_options_str  += '<option value="03.561.09.01.">03.561.09.01.</option>';
+            Code_Commu_options_str  += '<option value="03.561.09.03.">03.561.09.03.</option>';
+            Code_Commu_options_str  += '<option value="03.561.09.07.">03.561.09.07.</option>';
+            Code_Commu_options_str  += '<option value="03.561.09.09.">03.561.09.09.</option>';
+            Code_Commu_options_str  += '<option value="03.561.09.11.">03.561.09.11.</option>';
+            Code_Commu_options_str  += '<option value="03.561.09.13.">03.561.09.13.</option>';
+            Code_Commu_options_str  += '<option value="03.561.11.01.">03.561.11.01.</option>';
+            Code_Commu_options_str  += '<option value="03.561.11.03.">03.561.11.03.</option>';
+            Code_Commu_options_str  += '<option value="03.561.11.05.">03.561.11.05.</option>';
+            Code_Commu_options_str  += '<option value="03.561.11.07.">03.561.11.07.</option>';
+            Code_Commu_options_str  += '<option value="03.561.11.09.">03.561.11.09.</option>';
+            Code_Commu_options_str  += '<option value="03.561.11.11.">03.561.11.11.</option>';
+            Code_Commu_options_str  += '<option value="03.561.11.13.">03.561.11.13.</option>';
+            Code_Commu_options_str  += '<option value="03.561.11.15.">03.561.11.15.</option>';
+            Code_Commu_options_str  += '<option value="03.561.13.01.">03.561.13.01.</option>';
+            Code_Commu_options_str  += '<option value="03.561.13.03.">03.561.13.03.</option>';
+            Code_Commu_options_str  += '<option value="03.561.13.05.">03.561.13.05.</option>';
+            Code_Commu_options_str  += '<option value="03.561.13.07.">03.561.13.07.</option>';
+            Code_Commu_options_str  += '<option value="03.561.13.09.">03.561.13.09.</option>';
+            Code_Commu_options_str  += '<option value="03.561.13.11.">03.561.13.11.</option>';
+            Code_Commu_options_str  += '<option value="03.561.13.13.">03.561.13.13.</option>';
+            Code_Commu_options_str  += '<option value="03.561.13.15.">03.561.13.15.</option>';
+            Code_Commu_options_str  += '<option value="03.591.01.01.">03.591.01.01.</option>';
+            Code_Commu_options_str  += '<option value="03.591.03.01.">03.591.03.01.</option>';
+            Code_Commu_options_str  += '<option value="03.591.03.03.">03.591.03.03.</option>';
+            Code_Commu_options_str  += '<option value="03.591.03.05.">03.591.03.05.</option>';
+            Code_Commu_options_str  += '<option value="03.591.03.07.">03.591.03.07.</option>';
+            Code_Commu_options_str  += '<option value="03.591.05.01.">03.591.05.01.</option>';
+            Code_Commu_options_str  += '<option value="03.591.05.02.">03.591.05.02.</option>';
+            Code_Commu_options_str  += '<option value="03.591.05.03.">03.591.05.03.</option>';
+            Code_Commu_options_str  += '<option value="03.591.05.05.">03.591.05.05.</option>';
+            Code_Commu_options_str  += '<option value="03.591.05.07.">03.591.05.07.</option>';
+            Code_Commu_options_str  += '<option value="03.591.05.09.">03.591.05.09.</option>';
+            Code_Commu_options_str  += '<option value="04.281.01.01.">04.281.01.01.</option>';
+            Code_Commu_options_str  += '<option value="04.281.01.05.">04.281.01.05.</option>';
+            Code_Commu_options_str  += '<option value="04.281.01.11.">04.281.01.11.</option>';
+            Code_Commu_options_str  += '<option value="04.281.03.01.">04.281.03.01.</option>';
+            Code_Commu_options_str  += '<option value="04.281.03.05.">04.281.03.05.</option>';
+            Code_Commu_options_str  += '<option value="04.281.03.11.">04.281.03.11.</option>';
+            Code_Commu_options_str  += '<option value="04.281.03.13.">04.281.03.13.</option>';
+            Code_Commu_options_str  += '<option value="04.281.05.03.">04.281.05.03.</option>';
+            Code_Commu_options_str  += '<option value="04.281.05.07.">04.281.05.07.</option>';
+            Code_Commu_options_str  += '<option value="04.281.05.09.">04.281.05.09.</option>';
+            Code_Commu_options_str  += '<option value="04.281.05.11.">04.281.05.11.</option>';
+            Code_Commu_options_str  += '<option value="04.281.07.01.">04.281.07.01.</option>';
+            Code_Commu_options_str  += '<option value="04.281.07.03.">04.281.07.03.</option>';
+            Code_Commu_options_str  += '<option value="04.281.07.05.">04.281.07.05.</option>';
+            Code_Commu_options_str  += '<option value="04.281.07.07.">04.281.07.07.</option>';
+            Code_Commu_options_str  += '<option value="04.281.09.01.">04.281.09.01.</option>';
+            Code_Commu_options_str  += '<option value="04.281.09.09.">04.281.09.09.</option>';
+            Code_Commu_options_str  += '<option value="04.281.09.13.">04.281.09.13.</option>';
+            Code_Commu_options_str  += '<option value="04.281.09.15.">04.281.09.15.</option>';
+            Code_Commu_options_str  += '<option value="04.281.11.03.">04.281.11.03.</option>';
+            Code_Commu_options_str  += '<option value="04.281.11.05.">04.281.11.05.</option>';
+            Code_Commu_options_str  += '<option value="04.281.11.07.">04.281.11.07.</option>';
+            Code_Commu_options_str  += '<option value="04.281.11.11.">04.281.11.11.</option>';
+            Code_Commu_options_str  += '<option value="04.291.01.01.">04.291.01.01.</option>';
+            Code_Commu_options_str  += '<option value="04.291.01.03.">04.291.01.03.</option>';
+            Code_Commu_options_str  += '<option value="04.291.01.05.">04.291.01.05.</option>';
+            Code_Commu_options_str  += '<option value="04.291.01.17.">04.291.01.17.</option>';
+            Code_Commu_options_str  += '<option value="04.291.03.01.">04.291.03.01.</option>';
+            Code_Commu_options_str  += '<option value="04.291.03.03.">04.291.03.03.</option>';
+            Code_Commu_options_str  += '<option value="04.291.03.05.">04.291.03.05.</option>';
+            Code_Commu_options_str  += '<option value="04.291.03.07.">04.291.03.07.</option>';
+            Code_Commu_options_str  += '<option value="04.291.03.09.">04.291.03.09.</option>';
+            Code_Commu_options_str  += '<option value="04.291.03.11.">04.291.03.11.</option>';
+            Code_Commu_options_str  += '<option value="04.291.03.13.">04.291.03.13.</option>';
+            Code_Commu_options_str  += '<option value="04.291.03.15.">04.291.03.15.</option>';
+            Code_Commu_options_str  += '<option value="04.291.03.17.">04.291.03.17.</option>';
+            Code_Commu_options_str  += '<option value="04.291.05.01.">04.291.05.01.</option>';
+            Code_Commu_options_str  += '<option value="04.291.05.03.">04.291.05.03.</option>';
+            Code_Commu_options_str  += '<option value="04.291.05.05.">04.291.05.05.</option>';
+            Code_Commu_options_str  += '<option value="04.291.05.07.">04.291.05.07.</option>';
+            Code_Commu_options_str  += '<option value="04.291.05.09.">04.291.05.09.</option>';
+            Code_Commu_options_str  += '<option value="04.291.05.11.">04.291.05.11.</option>';
+            Code_Commu_options_str  += '<option value="04.291.05.13.">04.291.05.13.</option>';
+            Code_Commu_options_str  += '<option value="04.291.07.01.">04.291.07.01.</option>';
+            Code_Commu_options_str  += '<option value="04.291.07.05.">04.291.07.05.</option>';
+            Code_Commu_options_str  += '<option value="04.291.07.07.">04.291.07.07.</option>';
+            Code_Commu_options_str  += '<option value="04.291.07.09.">04.291.07.09.</option>';
+            Code_Commu_options_str  += '<option value="04.291.07.11.">04.291.07.11.</option>';
+            Code_Commu_options_str  += '<option value="04.291.07.13.">04.291.07.13.</option>';
+            Code_Commu_options_str  += '<option value="04.291.07.15.">04.291.07.15.</option>';
+            Code_Commu_options_str  += '<option value="04.291.09.02.">04.291.09.02.</option>';
+            Code_Commu_options_str  += '<option value="04.291.09.03.">04.291.09.03.</option>';
+            Code_Commu_options_str  += '<option value="04.291.09.05.">04.291.09.05.</option>';
+            Code_Commu_options_str  += '<option value="04.291.09.07.">04.291.09.07.</option>';
+            Code_Commu_options_str  += '<option value="04.291.09.09.">04.291.09.09.</option>';
+            Code_Commu_options_str  += '<option value="04.291.09.11.">04.291.09.11.</option>';
+            Code_Commu_options_str  += '<option value="04.291.09.13.">04.291.09.13.</option>';
+            Code_Commu_options_str  += '<option value="04.291.09.19.">04.291.09.19.</option>';
+            Code_Commu_options_str  += '<option value="04.421.00.01.">04.421.00.01.</option>';
+            Code_Commu_options_str  += '<option value="04.421.01.07.">04.421.01.07.</option>';
+            Code_Commu_options_str  += '<option value="04.441.00.01.">04.441.00.01.</option>';
+            Code_Commu_options_str  += '<option value="04.441.01.08.">04.441.01.08.</option>';
+            Code_Commu_options_str  += '<option value="04.441.03.01.">04.441.03.01.</option>';
+            Code_Commu_options_str  += '<option value="04.441.03.05.">04.441.03.05.</option>';
+            Code_Commu_options_str  += '<option value="04.481.01.01.">04.481.01.01.</option>';
+            Code_Commu_options_str  += '<option value="04.481.01.03.">04.481.01.03.</option>';
+            Code_Commu_options_str  += '<option value="04.481.01.05.">04.481.01.05.</option>';
+            Code_Commu_options_str  += '<option value="04.481.01.07.">04.481.01.07.</option>';
+            Code_Commu_options_str  += '<option value="04.481.01.11.">04.481.01.11.</option>';
+            Code_Commu_options_str  += '<option value="04.481.03.01.">04.481.03.01.</option>';
+            Code_Commu_options_str  += '<option value="04.481.03.03.">04.481.03.03.</option>';
+            Code_Commu_options_str  += '<option value="04.481.03.09.">04.481.03.09.</option>';
+            Code_Commu_options_str  += '<option value="04.481.03.13.">04.481.03.13.</option>';
+            Code_Commu_options_str  += '<option value="04.481.03.15.">04.481.03.15.</option>';
+            Code_Commu_options_str  += '<option value="04.481.03.17.">04.481.03.17.</option>';
+            Code_Commu_options_str  += '<option value="04.481.05.01.">04.481.05.01.</option>';
+            Code_Commu_options_str  += '<option value="04.481.05.07.">04.481.05.07.</option>';
+            Code_Commu_options_str  += '<option value="04.481.05.09.">04.481.05.09.</option>';
+            Code_Commu_options_str  += '<option value="04.481.07.05.">04.481.07.05.</option>';
+            Code_Commu_options_str  += '<option value="04.481.07.07.">04.481.07.07.</option>';
+            Code_Commu_options_str  += '<option value="04.481.07.11.">04.481.07.11.</option>';
+            Code_Commu_options_str  += '<option value="04.481.07.19.">04.481.07.19.</option>';
+            Code_Commu_options_str  += '<option value="04.481.07.21.">04.481.07.21.</option>';
+            Code_Commu_options_str  += '<option value="04.481.09.01.">04.481.09.01.</option>';
+            Code_Commu_options_str  += '<option value="04.481.09.03.">04.481.09.03.</option>';
+            Code_Commu_options_str  += '<option value="04.481.09.05.">04.481.09.05.</option>';
+            Code_Commu_options_str  += '<option value="04.481.09.07.">04.481.09.07.</option>';
+            Code_Commu_options_str  += '<option value="04.481.09.09.">04.481.09.09.</option>';
+            Code_Commu_options_str  += '<option value="04.481.09.11.">04.481.09.11.</option>';
+            Code_Commu_options_str  += '<option value="04.481.09.13.">04.481.09.13.</option>';
+            Code_Commu_options_str  += '<option value="04.481.11.03.">04.481.11.03.</option>';
+            Code_Commu_options_str  += '<option value="04.481.11.05.">04.481.11.05.</option>';
+            Code_Commu_options_str  += '<option value="04.481.11.11.">04.481.11.11.</option>';
+            Code_Commu_options_str  += '<option value="04.491.01.07.">04.491.01.07.</option>';
+            Code_Commu_options_str  += '<option value="04.491.01.09.">04.491.01.09.</option>';
+            Code_Commu_options_str  += '<option value="04.491.03.07.">04.491.03.07.</option>';
+            Code_Commu_options_str  += '<option value="04.491.03.15.">04.491.03.15.</option>';
+            Code_Commu_options_str  += '<option value="04.491.03.17.">04.491.03.17.</option>';
+            Code_Commu_options_str  += '<option value="04.491.05.01.">04.491.05.01.</option>';
+            Code_Commu_options_str  += '<option value="04.491.05.03.">04.491.05.03.</option>';
+            Code_Commu_options_str  += '<option value="04.491.05.05.">04.491.05.05.</option>';
+            Code_Commu_options_str  += '<option value="04.491.05.09.">04.491.05.09.</option>';
+            Code_Commu_options_str  += '<option value="04.491.05.11.">04.491.05.11.</option>';
+            Code_Commu_options_str  += '<option value="04.491.05.13.">04.491.05.13.</option>';
+            Code_Commu_options_str  += '<option value="04.501.01.01.">04.501.01.01.</option>';
+            Code_Commu_options_str  += '<option value="04.501.01.03.">04.501.01.03.</option>';
+            Code_Commu_options_str  += '<option value="04.501.01.05.">04.501.01.05.</option>';
+            Code_Commu_options_str  += '<option value="04.501.01.07.">04.501.01.07.</option>';
+            Code_Commu_options_str  += '<option value="04.501.01.09.">04.501.01.09.</option>';
+            Code_Commu_options_str  += '<option value="04.501.03.01.">04.501.03.01.</option>';
+            Code_Commu_options_str  += '<option value="04.501.03.03.">04.501.03.03.</option>';
+            Code_Commu_options_str  += '<option value="04.501.03.11.">04.501.03.11.</option>';
+            Code_Commu_options_str  += '<option value="04.501.05.03.">04.501.05.03.</option>';
+            Code_Commu_options_str  += '<option value="04.501.05.05.">04.501.05.05.</option>';
+            Code_Commu_options_str  += '<option value="05.081.01.01.">05.081.01.01.</option>';
+            Code_Commu_options_str  += '<option value="05.081.01.03.">05.081.01.03.</option>';
+            Code_Commu_options_str  += '<option value="05.081.03.01.">05.081.03.01.</option>';
+            Code_Commu_options_str  += '<option value="05.081.03.03.">05.081.03.03.</option>';
+            Code_Commu_options_str  += '<option value="05.081.03.05.">05.081.03.05.</option>';
+            Code_Commu_options_str  += '<option value="05.081.03.07.">05.081.03.07.</option>';
+            Code_Commu_options_str  += '<option value="05.081.03.09.">05.081.03.09.</option>';
+            Code_Commu_options_str  += '<option value="05.081.03.11.">05.081.03.11.</option>';
+            Code_Commu_options_str  += '<option value="05.081.03.13.">05.081.03.13.</option>';
+            Code_Commu_options_str  += '<option value="05.081.05.01.">05.081.05.01.</option>';
+            Code_Commu_options_str  += '<option value="05.081.05.05.">05.081.05.05.</option>';
+            Code_Commu_options_str  += '<option value="05.081.05.07.">05.081.05.07.</option>';
+            Code_Commu_options_str  += '<option value="05.081.05.09.">05.081.05.09.</option>';
+            Code_Commu_options_str  += '<option value="05.081.05.11.">05.081.05.11.</option>';
+            Code_Commu_options_str  += '<option value="05.081.05.13.">05.081.05.13.</option>';
+            Code_Commu_options_str  += '<option value="05.081.05.15.">05.081.05.15.</option>';
+            Code_Commu_options_str  += '<option value="05.081.05.17.">05.081.05.17.</option>';
+            Code_Commu_options_str  += '<option value="05.081.05.19.">05.081.05.19.</option>';
+            Code_Commu_options_str  += '<option value="05.081.05.21.">05.081.05.21.</option>';
+            Code_Commu_options_str  += '<option value="05.081.09.03.">05.081.09.03.</option>';
+            Code_Commu_options_str  += '<option value="05.081.09.07.">05.081.09.07.</option>';
+            Code_Commu_options_str  += '<option value="05.081.09.09.">05.081.09.09.</option>';
+            Code_Commu_options_str  += '<option value="05.081.09.11.">05.081.09.11.</option>';
+            Code_Commu_options_str  += '<option value="05.081.09.13.">05.081.09.13.</option>';
+            Code_Commu_options_str  += '<option value="05.081.09.15.">05.081.09.15.</option>';
+            Code_Commu_options_str  += '<option value="05.081.09.17.">05.081.09.17.</option>';
+            Code_Commu_options_str  += '<option value="05.081.09.19.">05.081.09.19.</option>';
+            Code_Commu_options_str  += '<option value="05.081.09.21.">05.081.09.21.</option>';
+            Code_Commu_options_str  += '<option value="05.081.09.23.">05.081.09.23.</option>';
+            Code_Commu_options_str  += '<option value="05.081.11.01.">05.081.11.01.</option>';
+            Code_Commu_options_str  += '<option value="05.081.11.03.">05.081.11.03.</option>';
+            Code_Commu_options_str  += '<option value="05.081.11.05.">05.081.11.05.</option>';
+            Code_Commu_options_str  += '<option value="05.081.11.25.">05.081.11.25.</option>';
+            Code_Commu_options_str  += '<option value="05.081.13.05.">05.081.13.05.</option>';
+            Code_Commu_options_str  += '<option value="05.081.13.07.">05.081.13.07.</option>';
+            Code_Commu_options_str  += '<option value="05.081.13.09.">05.081.13.09.</option>';
+            Code_Commu_options_str  += '<option value="05.081.13.17.">05.081.13.17.</option>';
+            Code_Commu_options_str  += '<option value="05.081.13.19.">05.081.13.19.</option>';
+            Code_Commu_options_str  += '<option value="05.081.15.01.">05.081.15.01.</option>';
+            Code_Commu_options_str  += '<option value="05.081.15.03.">05.081.15.03.</option>';
+            Code_Commu_options_str  += '<option value="05.081.15.11.">05.081.15.11.</option>';
+            Code_Commu_options_str  += '<option value="05.081.15.13.">05.081.15.13.</option>';
+            Code_Commu_options_str  += '<option value="05.081.15.15.">05.081.15.15.</option>';
+            Code_Commu_options_str  += '<option value="05.081.15.21.">05.081.15.21.</option>';
+            Code_Commu_options_str  += '<option value="05.091.01.01.">05.091.01.01.</option>';
+            Code_Commu_options_str  += '<option value="05.091.01.03.">05.091.01.03.</option>';
+            Code_Commu_options_str  += '<option value="05.091.01.07.">05.091.01.07.</option>';
+            Code_Commu_options_str  += '<option value="05.091.01.13.">05.091.01.13.</option>';
+            Code_Commu_options_str  += '<option value="05.091.03.01.">05.091.03.01.</option>';
+            Code_Commu_options_str  += '<option value="05.091.03.03.">05.091.03.03.</option>';
+            Code_Commu_options_str  += '<option value="05.091.03.05.">05.091.03.05.</option>';
+            Code_Commu_options_str  += '<option value="05.091.03.07.">05.091.03.07.</option>';
+            Code_Commu_options_str  += '<option value="05.091.03.09.">05.091.03.09.</option>';
+            Code_Commu_options_str  += '<option value="05.091.03.11.">05.091.03.11.</option>';
+            Code_Commu_options_str  += '<option value="05.091.05.01.">05.091.05.01.</option>';
+            Code_Commu_options_str  += '<option value="05.091.05.05.">05.091.05.05.</option>';
+            Code_Commu_options_str  += '<option value="05.091.05.17.">05.091.05.17.</option>';
+            Code_Commu_options_str  += '<option value="05.091.07.03.">05.091.07.03.</option>';
+            Code_Commu_options_str  += '<option value="05.091.07.07.">05.091.07.07.</option>';
+            Code_Commu_options_str  += '<option value="05.091.07.11.">05.091.07.11.</option>';
+            Code_Commu_options_str  += '<option value="05.091.07.13.">05.091.07.13.</option>';
+            Code_Commu_options_str  += '<option value="05.091.07.15.">05.091.07.15.</option>';
+            Code_Commu_options_str  += '<option value="05.091.11.01.">05.091.11.01.</option>';
+            Code_Commu_options_str  += '<option value="05.091.11.03.">05.091.11.03.</option>';
+            Code_Commu_options_str  += '<option value="05.091.11.05.">05.091.11.05.</option>';
+            Code_Commu_options_str  += '<option value="05.091.11.07.">05.091.11.07.</option>';
+            Code_Commu_options_str  += '<option value="05.255.01.05.">05.255.01.05.</option>';
+            Code_Commu_options_str  += '<option value="05.255.01.09.">05.255.01.09.</option>';
+            Code_Commu_options_str  += '<option value="05.255.01.11.">05.255.01.11.</option>';
+            Code_Commu_options_str  += '<option value="05.255.05.05.">05.255.05.05.</option>';
+            Code_Commu_options_str  += '<option value="05.255.05.09.">05.255.05.09.</option>';
+            Code_Commu_options_str  += '<option value="05.255.05.11.">05.255.05.11.</option>';
+            Code_Commu_options_str  += '<option value="05.255.05.13.">05.255.05.13.</option>';
+            Code_Commu_options_str  += '<option value="05.255.09.01.">05.255.09.01.</option>';
+            Code_Commu_options_str  += '<option value="05.255.09.03.">05.255.09.03.</option>';
+            Code_Commu_options_str  += '<option value="05.255.09.05.">05.255.09.05.</option>';
+            Code_Commu_options_str  += '<option value="05.255.09.07.">05.255.09.07.</option>';
+            Code_Commu_options_str  += '<option value="05.255.09.09.">05.255.09.09.</option>';
+            Code_Commu_options_str  += '<option value="05.255.09.11.">05.255.09.11.</option>';
+            Code_Commu_options_str  += '<option value="05.255.11.01.">05.255.11.01.</option>';
+            Code_Commu_options_str  += '<option value="05.255.11.03.">05.255.11.03.</option>';
+            Code_Commu_options_str  += '<option value="05.255.11.07.">05.255.11.07.</option>';
+            Code_Commu_options_str  += '<option value="05.301.01.01.">05.301.01.01.</option>';
+            Code_Commu_options_str  += '<option value="05.301.01.05.">05.301.01.05.</option>';
+            Code_Commu_options_str  += '<option value="05.301.03.01.">05.301.03.01.</option>';
+            Code_Commu_options_str  += '<option value="05.301.03.03.">05.301.03.03.</option>';
+            Code_Commu_options_str  += '<option value="05.301.03.05.">05.301.03.05.</option>';
+            Code_Commu_options_str  += '<option value="05.301.03.07.">05.301.03.07.</option>';
+            Code_Commu_options_str  += '<option value="05.301.03.09.">05.301.03.09.</option>';
+            Code_Commu_options_str  += '<option value="05.301.03.11.">05.301.03.11.</option>';
+            Code_Commu_options_str  += '<option value="05.301.03.13.">05.301.03.13.</option>';
+            Code_Commu_options_str  += '<option value="05.301.05.01.">05.301.05.01.</option>';
+            Code_Commu_options_str  += '<option value="05.301.05.05.">05.301.05.05.</option>';
+            Code_Commu_options_str  += '<option value="05.301.05.11.">05.301.05.11.</option>';
+            Code_Commu_options_str  += '<option value="05.301.05.13.">05.301.05.13.</option>';
+            Code_Commu_options_str  += '<option value="05.301.05.21.">05.301.05.21.</option>';
+            Code_Commu_options_str  += '<option value="05.301.05.25.">05.301.05.25.</option>';
+            Code_Commu_options_str  += '<option value="05.301.07.03.">05.301.07.03.</option>';
+            Code_Commu_options_str  += '<option value="05.301.07.07.">05.301.07.07.</option>';
+            Code_Commu_options_str  += '<option value="05.301.07.09.">05.301.07.09.</option>';
+            Code_Commu_options_str  += '<option value="05.301.07.15.">05.301.07.15.</option>';
+            Code_Commu_options_str  += '<option value="05.301.07.17.">05.301.07.17.</option>';
+            Code_Commu_options_str  += '<option value="05.301.07.19.">05.301.07.19.</option>';
+            Code_Commu_options_str  += '<option value="05.301.07.23.">05.301.07.23.</option>';
+            Code_Commu_options_str  += '<option value="05.311.01.01.">05.311.01.01.</option>';
+            Code_Commu_options_str  += '<option value="05.311.01.03.">05.311.01.03.</option>';
+            Code_Commu_options_str  += '<option value="05.311.01.05.">05.311.01.05.</option>';
+            Code_Commu_options_str  += '<option value="05.311.01.07.">05.311.01.07.</option>';
+            Code_Commu_options_str  += '<option value="05.311.01.09.">05.311.01.09.</option>';
+            Code_Commu_options_str  += '<option value="05.311.03.01.">05.311.03.01.</option>';
+            Code_Commu_options_str  += '<option value="05.311.03.03.">05.311.03.03.</option>';
+            Code_Commu_options_str  += '<option value="05.311.03.05.">05.311.03.05.</option>';
+            Code_Commu_options_str  += '<option value="05.311.03.07.">05.311.03.07.</option>';
+            Code_Commu_options_str  += '<option value="05.311.03.09.">05.311.03.09.</option>';
+            Code_Commu_options_str  += '<option value="05.311.03.11.">05.311.03.11.</option>';
+            Code_Commu_options_str  += '<option value="05.311.03.13.">05.311.03.13.</option>';
+            Code_Commu_options_str  += '<option value="05.311.03.15.">05.311.03.15.</option>';
+            Code_Commu_options_str  += '<option value="05.311.05.01.">05.311.05.01.</option>';
+            Code_Commu_options_str  += '<option value="05.311.05.03.">05.311.05.03.</option>';
+            Code_Commu_options_str  += '<option value="05.311.05.05.">05.311.05.05.</option>';
+            Code_Commu_options_str  += '<option value="05.311.05.07.">05.311.05.07.</option>';
+            Code_Commu_options_str  += '<option value="05.311.05.09.">05.311.05.09.</option>';
+            Code_Commu_options_str  += '<option value="05.311.05.11.">05.311.05.11.</option>';
+            Code_Commu_options_str  += '<option value="05.311.05.13.">05.311.05.13.</option>';
+            Code_Commu_options_str  += '<option value="05.311.05.15.">05.311.05.15.</option>';
+            Code_Commu_options_str  += '<option value="05.311.07.01.">05.311.07.01.</option>';
+            Code_Commu_options_str  += '<option value="05.311.07.03.">05.311.07.03.</option>';
+            Code_Commu_options_str  += '<option value="05.311.07.05.">05.311.07.05.</option>';
+            Code_Commu_options_str  += '<option value="05.311.07.07.">05.311.07.07.</option>';
+            Code_Commu_options_str  += '<option value="05.311.07.09.">05.311.07.09.</option>';
+            Code_Commu_options_str  += '<option value="05.311.07.11.">05.311.07.11.</option>';
+            Code_Commu_options_str  += '<option value="05.311.07.13.">05.311.07.13.</option>';
+            Code_Commu_options_str  += '<option value="05.311.07.15.">05.311.07.15.</option>';
+            Code_Commu_options_str  += '<option value="05.311.07.17.">05.311.07.17.</option>';
+            Code_Commu_options_str  += '<option value="05.311.07.19.">05.311.07.19.</option>';
+            Code_Commu_options_str  += '<option value="06.111.01.01.">06.111.01.01.</option>';
+            Code_Commu_options_str  += '<option value="06.111.01.03.">06.111.01.03.</option>';
+            Code_Commu_options_str  += '<option value="06.111.01.05.">06.111.01.05.</option>';
+            Code_Commu_options_str  += '<option value="06.111.03.01.">06.111.03.01.</option>';
+            Code_Commu_options_str  += '<option value="06.111.03.03.">06.111.03.03.</option>';
+            Code_Commu_options_str  += '<option value="06.111.03.05.">06.111.03.05.</option>';
+            Code_Commu_options_str  += '<option value="06.111.03.07.">06.111.03.07.</option>';
+            Code_Commu_options_str  += '<option value="06.111.03.11.">06.111.03.11.</option>';
+            Code_Commu_options_str  += '<option value="06.111.03.13.">06.111.03.13.</option>';
+            Code_Commu_options_str  += '<option value="06.111.03.15.">06.111.03.15.</option>';
+            Code_Commu_options_str  += '<option value="06.111.03.17.">06.111.03.17.</option>';
+            Code_Commu_options_str  += '<option value="06.111.03.19.">06.111.03.19.</option>';
+            Code_Commu_options_str  += '<option value="06.111.05.01.">06.111.05.01.</option>';
+            Code_Commu_options_str  += '<option value="06.111.05.04.">06.111.05.04.</option>';
+            Code_Commu_options_str  += '<option value="06.111.05.05.">06.111.05.05.</option>';
+            Code_Commu_options_str  += '<option value="06.117.01.03.">06.117.01.03.</option>';
+            Code_Commu_options_str  += '<option value="06.117.01.05.">06.117.01.05.</option>';
+            Code_Commu_options_str  += '<option value="06.117.01.07.">06.117.01.07.</option>';
+            Code_Commu_options_str  += '<option value="06.117.01.09.">06.117.01.09.</option>';
+            Code_Commu_options_str  += '<option value="06.117.01.11.">06.117.01.11.</option>';
+            Code_Commu_options_str  += '<option value="06.117.01.13.">06.117.01.13.</option>';
+            Code_Commu_options_str  += '<option value="06.117.05.01.">06.117.05.01.</option>';
+            Code_Commu_options_str  += '<option value="06.117.05.11.">06.117.05.11.</option>';
+            Code_Commu_options_str  += '<option value="06.117.05.13.">06.117.05.13.</option>';
+            Code_Commu_options_str  += '<option value="06.117.05.25.">06.117.05.25.</option>';
+            Code_Commu_options_str  += '<option value="06.117.05.27.">06.117.05.27.</option>';
+            Code_Commu_options_str  += '<option value="06.117.05.29.">06.117.05.29.</option>';
+            Code_Commu_options_str  += '<option value="06.117.05.33.">06.117.05.33.</option>';
+            Code_Commu_options_str  += '<option value="06.117.05.35.">06.117.05.35.</option>';
+            Code_Commu_options_str  += '<option value="06.117.08.05.">06.117.08.05.</option>';
+            Code_Commu_options_str  += '<option value="06.117.08.07.">06.117.08.07.</option>';
+            Code_Commu_options_str  += '<option value="06.117.08.09.">06.117.08.09.</option>';
+            Code_Commu_options_str  += '<option value="06.117.08.17.">06.117.08.17.</option>';
+            Code_Commu_options_str  += '<option value="06.117.08.19.">06.117.08.19.</option>';
+            Code_Commu_options_str  += '<option value="06.117.08.20.">06.117.08.20.</option>';
+            Code_Commu_options_str  += '<option value="06.117.08.21.">06.117.08.21.</option>';
+            Code_Commu_options_str  += '<option value="06.117.08.23.">06.117.08.23.</option>';
+            Code_Commu_options_str  += '<option value="06.141.00.01.">06.141.00.01.</option>';
+            Code_Commu_options_str  += '<option value="06.141.01.81.">06.141.01.81.</option>';
+            Code_Commu_options_str  += '<option value="06.181.01.01.">06.181.01.01.</option>';
+            Code_Commu_options_str  += '<option value="06.181.01.03.">06.181.01.03.</option>';
+            Code_Commu_options_str  += '<option value="06.181.01.05.">06.181.01.05.</option>';
+            Code_Commu_options_str  += '<option value="06.181.03.01.">06.181.03.01.</option>';
+            Code_Commu_options_str  += '<option value="06.181.03.05.">06.181.03.05.</option>';
+            Code_Commu_options_str  += '<option value="06.181.03.07.">06.181.03.07.</option>';
+            Code_Commu_options_str  += '<option value="06.181.03.11.">06.181.03.11.</option>';
+            Code_Commu_options_str  += '<option value="06.181.05.01.">06.181.05.01.</option>';
+            Code_Commu_options_str  += '<option value="06.181.05.03.">06.181.05.03.</option>';
+            Code_Commu_options_str  += '<option value="06.181.05.05.">06.181.05.05.</option>';
+            Code_Commu_options_str  += '<option value="06.181.05.07.">06.181.05.07.</option>';
+            Code_Commu_options_str  += '<option value="06.181.05.09.">06.181.05.09.</option>';
+            Code_Commu_options_str  += '<option value="06.181.05.11.">06.181.05.11.</option>';
+            Code_Commu_options_str  += '<option value="06.181.07.03.">06.181.07.03.</option>';
+            Code_Commu_options_str  += '<option value="06.181.07.09.">06.181.07.09.</option>';
+            Code_Commu_options_str  += '<option value="06.181.09.01.">06.181.09.01.</option>';
+            Code_Commu_options_str  += '<option value="06.181.09.03.">06.181.09.03.</option>';
+            Code_Commu_options_str  += '<option value="06.181.09.05.">06.181.09.05.</option>';
+            Code_Commu_options_str  += '<option value="06.181.09.07.">06.181.09.07.</option>';
+            Code_Commu_options_str  += '<option value="06.181.09.09.">06.181.09.09.</option>';
+            Code_Commu_options_str  += '<option value="06.181.09.11.">06.181.09.11.</option>';
+            Code_Commu_options_str  += '<option value="06.181.09.13.">06.181.09.13.</option>';
+            Code_Commu_options_str  += '<option value="06.181.09.15.">06.181.09.15.</option>';
+            Code_Commu_options_str  += '<option value="06.181.09.17.">06.181.09.17.</option>';
+            Code_Commu_options_str  += '<option value="06.181.09.19.">06.181.09.19.</option>';
+            Code_Commu_options_str  += '<option value="06.181.09.21.">06.181.09.21.</option>';
+            Code_Commu_options_str  += '<option value="06.181.09.23.">06.181.09.23.</option>';
+            Code_Commu_options_str  += '<option value="06.355.01.01.">06.355.01.01.</option>';
+            Code_Commu_options_str  += '<option value="06.355.01.03.">06.355.01.03.</option>';
+            Code_Commu_options_str  += '<option value="06.355.01.05.">06.355.01.05.</option>';
+            Code_Commu_options_str  += '<option value="06.355.03.01.">06.355.03.01.</option>';
+            Code_Commu_options_str  += '<option value="06.355.03.05.">06.355.03.05.</option>';
+            Code_Commu_options_str  += '<option value="06.371.01.01.">06.371.01.01.</option>';
+            Code_Commu_options_str  += '<option value="06.371.01.03.">06.371.01.03.</option>';
+            Code_Commu_options_str  += '<option value="06.371.03.01.">06.371.03.01.</option>';
+            Code_Commu_options_str  += '<option value="06.371.03.03.">06.371.03.03.</option>';
+            Code_Commu_options_str  += '<option value="06.371.03.05.">06.371.03.05.</option>';
+            Code_Commu_options_str  += '<option value="06.371.03.07.">06.371.03.07.</option>';
+            Code_Commu_options_str  += '<option value="06.385.01.01.">06.385.01.01.</option>';
+            Code_Commu_options_str  += '<option value="06.385.01.02.">06.385.01.02.</option>';
+            Code_Commu_options_str  += '<option value="06.385.01.03.">06.385.01.03.</option>';
+            Code_Commu_options_str  += '<option value="06.385.03.03.">06.385.03.03.</option>';
+            Code_Commu_options_str  += '<option value="06.385.03.05.">06.385.03.05.</option>';
+            Code_Commu_options_str  += '<option value="06.461.01.01.">06.461.01.01.</option>';
+            Code_Commu_options_str  += '<option value="06.461.01.05.">06.461.01.05.</option>';
+            Code_Commu_options_str  += '<option value="06.461.01.09.">06.461.01.09.</option>';
+            Code_Commu_options_str  += '<option value="06.461.01.13.">06.461.01.13.</option>';
+            Code_Commu_options_str  += '<option value="06.461.01.15.">06.461.01.15.</option>';
+            Code_Commu_options_str  += '<option value="06.461.03.02.">06.461.03.02.</option>';
+            Code_Commu_options_str  += '<option value="06.461.03.03.">06.461.03.03.</option>';
+            Code_Commu_options_str  += '<option value="06.461.03.07.">06.461.03.07.</option>';
+            Code_Commu_options_str  += '<option value="06.461.03.09.">06.461.03.09.</option>';
+            Code_Commu_options_str  += '<option value="06.461.03.11.">06.461.03.11.</option>';
+            Code_Commu_options_str  += '<option value="06.461.03.13.">06.461.03.13.</option>';
+            Code_Commu_options_str  += '<option value="06.461.03.15.">06.461.03.15.</option>';
+            Code_Commu_options_str  += '<option value="06.461.03.17.">06.461.03.17.</option>';
+            Code_Commu_options_str  += '<option value="06.461.03.19.">06.461.03.19.</option>';
+            Code_Commu_options_str  += '<option value="06.461.03.21.">06.461.03.21.</option>';
+            Code_Commu_options_str  += '<option value="06.461.03.23.">06.461.03.23.</option>';
+            Code_Commu_options_str  += '<option value="06.461.03.25.">06.461.03.25.</option>';
+            Code_Commu_options_str  += '<option value="06.461.03.27.">06.461.03.27.</option>';
+            Code_Commu_options_str  += '<option value="06.461.03.29.">06.461.03.29.</option>';
+            Code_Commu_options_str  += '<option value="06.461.03.31.">06.461.03.31.</option>';
+            Code_Commu_options_str  += '<option value="06.461.03.33.">06.461.03.33.</option>';
+            Code_Commu_options_str  += '<option value="06.461.07.01.">06.461.07.01.</option>';
+            Code_Commu_options_str  += '<option value="06.461.07.03.">06.461.07.03.</option>';
+            Code_Commu_options_str  += '<option value="06.461.07.05.">06.461.07.05.</option>';
+            Code_Commu_options_str  += '<option value="06.461.07.07.">06.461.07.07.</option>';
+            Code_Commu_options_str  += '<option value="06.461.07.09.">06.461.07.09.</option>';
+            Code_Commu_options_str  += '<option value="06.461.07.11.">06.461.07.11.</option>';
+            Code_Commu_options_str  += '<option value="06.461.07.13.">06.461.07.13.</option>';
+            Code_Commu_options_str  += '<option value="06.461.07.15.">06.461.07.15.</option>';
+            Code_Commu_options_str  += '<option value="06.461.07.17.">06.461.07.17.</option>';
+            Code_Commu_options_str  += '<option value="06.461.07.19.">06.461.07.19.</option>';
+            Code_Commu_options_str  += '<option value="06.461.07.21.">06.461.07.21.</option>';
+            Code_Commu_options_str  += '<option value="06.461.09.03.">06.461.09.03.</option>';
+            Code_Commu_options_str  += '<option value="06.461.09.05.">06.461.09.05.</option>';
+            Code_Commu_options_str  += '<option value="06.461.09.07.">06.461.09.07.</option>';
+            Code_Commu_options_str  += '<option value="06.461.09.09.">06.461.09.09.</option>';
+            Code_Commu_options_str  += '<option value="06.461.09.11.">06.461.09.11.</option>';
+            Code_Commu_options_str  += '<option value="06.461.09.13.">06.461.09.13.</option>';
+            Code_Commu_options_str  += '<option value="06.461.09.14.">06.461.09.14.</option>';
+            Code_Commu_options_str  += '<option value="06.461.09.15.">06.461.09.15.</option>';
+            Code_Commu_options_str  += '<option value="06.461.09.19.">06.461.09.19.</option>';
+            Code_Commu_options_str  += '<option value="06.461.09.21.">06.461.09.21.</option>';
+            Code_Commu_options_str  += '<option value="06.461.09.23.">06.461.09.23.</option>';
+            Code_Commu_options_str  += '<option value="06.461.09.25.">06.461.09.25.</option>';
+            Code_Commu_options_str  += '<option value="06.461.09.27.">06.461.09.27.</option>';
+            Code_Commu_options_str  += '<option value="06.461.09.31.">06.461.09.31.</option>';
+            Code_Commu_options_str  += '<option value="06.467.01.07.">06.467.01.07.</option>';
+            Code_Commu_options_str  += '<option value="06.467.01.09.">06.467.01.09.</option>';
+            Code_Commu_options_str  += '<option value="06.467.07.01.">06.467.07.01.</option>';
+            Code_Commu_options_str  += '<option value="06.467.07.03.">06.467.07.03.</option>';
+            Code_Commu_options_str  += '<option value="06.467.07.05.">06.467.07.05.</option>';
+            Code_Commu_options_str  += '<option value="06.467.07.07.">06.467.07.07.</option>';
+            Code_Commu_options_str  += '<option value="06.467.07.09.">06.467.07.09.</option>';
+            Code_Commu_options_str  += '<option value="06.467.07.11.">06.467.07.11.</option>';
+            Code_Commu_options_str  += '<option value="06.467.07.13.">06.467.07.13.</option>';
+            Code_Commu_options_str  += '<option value="06.467.07.15.">06.467.07.15.</option>';
+            Code_Commu_options_str  += '<option value="06.467.07.17.">06.467.07.17.</option>';
+            Code_Commu_options_str  += '<option value="06.467.07.19.">06.467.07.19.</option>';
+            Code_Commu_options_str  += '<option value="06.467.07.21.">06.467.07.21.</option>';
+            Code_Commu_options_str  += '<option value="06.467.07.23.">06.467.07.23.</option>';
+            Code_Commu_options_str  += '<option value="06.467.07.25.">06.467.07.25.</option>';
+            Code_Commu_options_str  += '<option value="06.467.07.27.">06.467.07.27.</option>';
+            Code_Commu_options_str  += '<option value="06.467.07.29.">06.467.07.29.</option>';
+            Code_Commu_options_str  += '<option value="06.467.07.31.">06.467.07.31.</option>';
+            Code_Commu_options_str  += '<option value="06.467.07.33.">06.467.07.33.</option>';
+            Code_Commu_options_str  += '<option value="06.467.07.35.">06.467.07.35.</option>';
+            Code_Commu_options_str  += '<option value="06.467.11.01.">06.467.11.01.</option>';
+            Code_Commu_options_str  += '<option value="06.467.11.03.">06.467.11.03.</option>';
+            Code_Commu_options_str  += '<option value="06.467.11.05.">06.467.11.05.</option>';
+            Code_Commu_options_str  += '<option value="06.467.11.07.">06.467.11.07.</option>';
+            Code_Commu_options_str  += '<option value="06.467.11.09.">06.467.11.09.</option>';
+            Code_Commu_options_str  += '<option value="07.041.01.01.">07.041.01.01.</option>';
+            Code_Commu_options_str  += '<option value="07.041.01.03.">07.041.01.03.</option>';
+            Code_Commu_options_str  += '<option value="07.041.01.09.">07.041.01.09.</option>';
+            Code_Commu_options_str  += '<option value="07.041.03.05.">07.041.03.05.</option>';
+            Code_Commu_options_str  += '<option value="07.041.03.09.">07.041.03.09.</option>';
+            Code_Commu_options_str  += '<option value="07.041.03.11.">07.041.03.11.</option>';
+            Code_Commu_options_str  += '<option value="07.041.03.13.">07.041.03.13.</option>';
+            Code_Commu_options_str  += '<option value="07.041.03.15.">07.041.03.15.</option>';
+            Code_Commu_options_str  += '<option value="07.041.03.19.">07.041.03.19.</option>';
+            Code_Commu_options_str  += '<option value="07.041.03.23.">07.041.03.23.</option>';
+            Code_Commu_options_str  += '<option value="07.041.05.01.">07.041.05.01.</option>';
+            Code_Commu_options_str  += '<option value="07.041.05.05.">07.041.05.05.</option>';
+            Code_Commu_options_str  += '<option value="07.041.05.07.">07.041.05.07.</option>';
+            Code_Commu_options_str  += '<option value="07.041.05.09.">07.041.05.09.</option>';
+            Code_Commu_options_str  += '<option value="07.041.05.11.">07.041.05.11.</option>';
+            Code_Commu_options_str  += '<option value="07.041.05.13.">07.041.05.13.</option>';
+            Code_Commu_options_str  += '<option value="07.041.05.15.">07.041.05.15.</option>';
+            Code_Commu_options_str  += '<option value="07.041.05.17.">07.041.05.17.</option>';
+            Code_Commu_options_str  += '<option value="07.041.05.19.">07.041.05.19.</option>';
+            Code_Commu_options_str  += '<option value="07.041.07.01.">07.041.07.01.</option>';
+            Code_Commu_options_str  += '<option value="07.041.07.03.">07.041.07.03.</option>';
+            Code_Commu_options_str  += '<option value="07.041.07.05.">07.041.07.05.</option>';
+            Code_Commu_options_str  += '<option value="07.041.07.07.">07.041.07.07.</option>';
+            Code_Commu_options_str  += '<option value="07.041.07.09.">07.041.07.09.</option>';
+            Code_Commu_options_str  += '<option value="07.041.07.11.">07.041.07.11.</option>';
+            Code_Commu_options_str  += '<option value="07.041.07.13.">07.041.07.13.</option>';
+            Code_Commu_options_str  += '<option value="07.041.09.01.">07.041.09.01.</option>';
+            Code_Commu_options_str  += '<option value="07.041.09.03.">07.041.09.03.</option>';
+            Code_Commu_options_str  += '<option value="07.041.09.05.">07.041.09.05.</option>';
+            Code_Commu_options_str  += '<option value="07.041.09.07.">07.041.09.07.</option>';
+            Code_Commu_options_str  += '<option value="07.041.09.11.">07.041.09.11.</option>';
+            Code_Commu_options_str  += '<option value="07.041.09.13.">07.041.09.13.</option>';
+            Code_Commu_options_str  += '<option value="07.041.11.01.">07.041.11.01.</option>';
+            Code_Commu_options_str  += '<option value="07.041.11.03.">07.041.11.03.</option>';
+            Code_Commu_options_str  += '<option value="07.041.11.07.">07.041.11.07.</option>';
+            Code_Commu_options_str  += '<option value="07.041.11.17.">07.041.11.17.</option>';
+            Code_Commu_options_str  += '<option value="07.041.11.21.">07.041.11.21.</option>';
+            Code_Commu_options_str  += '<option value="07.041.11.25.">07.041.11.25.</option>';
+            Code_Commu_options_str  += '<option value="07.041.11.27.">07.041.11.27.</option>';
+            Code_Commu_options_str  += '<option value="07.041.11.29.">07.041.11.29.</option>';
+            Code_Commu_options_str  += '<option value="07.161.01.01.">07.161.01.01.</option>';
+            Code_Commu_options_str  += '<option value="07.161.01.03.">07.161.01.03.</option>';
+            Code_Commu_options_str  += '<option value="07.161.03.01.">07.161.03.01.</option>';
+            Code_Commu_options_str  += '<option value="07.161.03.03.">07.161.03.03.</option>';
+            Code_Commu_options_str  += '<option value="07.161.03.05.">07.161.03.05.</option>';
+            Code_Commu_options_str  += '<option value="07.161.03.07.">07.161.03.07.</option>';
+            Code_Commu_options_str  += '<option value="07.161.03.09.">07.161.03.09.</option>';
+            Code_Commu_options_str  += '<option value="07.161.03.11.">07.161.03.11.</option>';
+            Code_Commu_options_str  += '<option value="07.161.03.13.">07.161.03.13.</option>';
+            Code_Commu_options_str  += '<option value="07.161.03.15.">07.161.03.15.</option>';
+            Code_Commu_options_str  += '<option value="07.161.05.01.">07.161.05.01.</option>';
+            Code_Commu_options_str  += '<option value="07.161.05.03.">07.161.05.03.</option>';
+            Code_Commu_options_str  += '<option value="07.161.05.05.">07.161.05.05.</option>';
+            Code_Commu_options_str  += '<option value="07.161.05.07.">07.161.05.07.</option>';
+            Code_Commu_options_str  += '<option value="07.161.05.09.">07.161.05.09.</option>';
+            Code_Commu_options_str  += '<option value="07.161.05.11.">07.161.05.11.</option>';
+            Code_Commu_options_str  += '<option value="07.161.05.13.">07.161.05.13.</option>';
+            Code_Commu_options_str  += '<option value="07.161.05.15.">07.161.05.15.</option>';
+            Code_Commu_options_str  += '<option value="07.161.05.17.">07.161.05.17.</option>';
+            Code_Commu_options_str  += '<option value="07.161.07.01.">07.161.07.01.</option>';
+            Code_Commu_options_str  += '<option value="07.161.07.03.">07.161.07.03.</option>';
+            Code_Commu_options_str  += '<option value="07.161.07.05.">07.161.07.05.</option>';
+            Code_Commu_options_str  += '<option value="07.161.07.07.">07.161.07.07.</option>';
+            Code_Commu_options_str  += '<option value="07.161.07.09.">07.161.07.09.</option>';
+            Code_Commu_options_str  += '<option value="07.161.07.11.">07.161.07.11.</option>';
+            Code_Commu_options_str  += '<option value="07.161.07.13.">07.161.07.13.</option>';
+            Code_Commu_options_str  += '<option value="07.161.07.15.">07.161.07.15.</option>';
+            Code_Commu_options_str  += '<option value="07.161.09.01.">07.161.09.01.</option>';
+            Code_Commu_options_str  += '<option value="07.161.09.03.">07.161.09.03.</option>';
+            Code_Commu_options_str  += '<option value="07.161.09.05.">07.161.09.05.</option>';
+            Code_Commu_options_str  += '<option value="07.161.09.07.">07.161.09.07.</option>';
+            Code_Commu_options_str  += '<option value="07.161.09.09.">07.161.09.09.</option>';
+            Code_Commu_options_str  += '<option value="07.161.09.11.">07.161.09.11.</option>';
+            Code_Commu_options_str  += '<option value="07.161.09.13.">07.161.09.13.</option>';
+            Code_Commu_options_str  += '<option value="07.161.09.15.">07.161.09.15.</option>';
+            Code_Commu_options_str  += '<option value="07.191.01.03.">07.191.01.03.</option>';
+            Code_Commu_options_str  += '<option value="07.191.01.05.">07.191.01.05.</option>';
+            Code_Commu_options_str  += '<option value="07.191.01.07.">07.191.01.07.</option>';
+            Code_Commu_options_str  += '<option value="07.191.01.09.">07.191.01.09.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.01.">07.191.03.01.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.03.">07.191.03.03.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.05.">07.191.03.05.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.07.">07.191.03.07.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.09.">07.191.03.09.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.11.">07.191.03.11.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.13.">07.191.03.13.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.15.">07.191.03.15.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.17.">07.191.03.17.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.19.">07.191.03.19.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.21.">07.191.03.21.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.23.">07.191.03.23.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.25.">07.191.03.25.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.27.">07.191.03.27.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.29.">07.191.03.29.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.31.">07.191.03.31.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.33.">07.191.03.33.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.35.">07.191.03.35.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.37.">07.191.03.37.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.39.">07.191.03.39.</option>';
+            Code_Commu_options_str  += '<option value="07.191.03.41.">07.191.03.41.</option>';
+            Code_Commu_options_str  += '<option value="07.191.05.01.">07.191.05.01.</option>';
+            Code_Commu_options_str  += '<option value="07.191.05.03.">07.191.05.03.</option>';
+            Code_Commu_options_str  += '<option value="07.191.05.05.">07.191.05.05.</option>';
+            Code_Commu_options_str  += '<option value="07.191.05.07.">07.191.05.07.</option>';
+            Code_Commu_options_str  += '<option value="07.191.05.09.">07.191.05.09.</option>';
+            Code_Commu_options_str  += '<option value="07.191.05.15.">07.191.05.15.</option>';
+            Code_Commu_options_str  += '<option value="07.191.05.16.">07.191.05.16.</option>';
+            Code_Commu_options_str  += '<option value="07.191.05.17.">07.191.05.17.</option>';
+            Code_Commu_options_str  += '<option value="07.191.05.19.">07.191.05.19.</option>';
+            Code_Commu_options_str  += '<option value="07.191.05.21.">07.191.05.21.</option>';
+            Code_Commu_options_str  += '<option value="07.191.05.23.">07.191.05.23.</option>';
+            Code_Commu_options_str  += '<option value="07.191.05.25.">07.191.05.25.</option>';
+            Code_Commu_options_str  += '<option value="07.191.05.27.">07.191.05.27.</option>';
+            Code_Commu_options_str  += '<option value="07.191.05.29.">07.191.05.29.</option>';
+            Code_Commu_options_str  += '<option value="07.191.07.11.">07.191.07.11.</option>';
+            Code_Commu_options_str  += '<option value="07.191.07.13.">07.191.07.13.</option>';
+            Code_Commu_options_str  += '<option value="07.191.07.31.">07.191.07.31.</option>';
+            Code_Commu_options_str  += '<option value="07.191.07.33.">07.191.07.33.</option>';
+            Code_Commu_options_str  += '<option value="07.211.01.01.">07.211.01.01.</option>';
+            Code_Commu_options_str  += '<option value="07.211.01.03.">07.211.01.03.</option>';
+            Code_Commu_options_str  += '<option value="07.211.01.05.">07.211.01.05.</option>';
+            Code_Commu_options_str  += '<option value="07.211.01.07.">07.211.01.07.</option>';
+            Code_Commu_options_str  += '<option value="07.211.01.09.">07.211.01.09.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.01.">07.211.03.01.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.03.">07.211.03.03.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.05.">07.211.03.05.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.07.">07.211.03.07.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.09.">07.211.03.09.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.11.">07.211.03.11.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.13.">07.211.03.13.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.15.">07.211.03.15.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.17.">07.211.03.17.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.19.">07.211.03.19.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.21.">07.211.03.21.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.23.">07.211.03.23.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.25.">07.211.03.25.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.27.">07.211.03.27.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.29.">07.211.03.29.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.31.">07.211.03.31.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.33.">07.211.03.33.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.35.">07.211.03.35.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.37.">07.211.03.37.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.39.">07.211.03.39.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.41.">07.211.03.41.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.43.">07.211.03.43.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.45.">07.211.03.45.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.47.">07.211.03.47.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.49.">07.211.03.49.</option>';
+            Code_Commu_options_str  += '<option value="07.211.03.51.">07.211.03.51.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.01.">07.211.05.01.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.03.">07.211.05.03.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.05.">07.211.05.05.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.07.">07.211.05.07.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.09.">07.211.05.09.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.11.">07.211.05.11.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.13.">07.211.05.13.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.15.">07.211.05.15.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.17.">07.211.05.17.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.19.">07.211.05.19.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.21.">07.211.05.21.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.23.">07.211.05.23.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.25.">07.211.05.25.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.27.">07.211.05.27.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.29.">07.211.05.29.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.31.">07.211.05.31.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.33.">07.211.05.33.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.35.">07.211.05.35.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.37.">07.211.05.37.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.39.">07.211.05.39.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.41.">07.211.05.41.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.43.">07.211.05.43.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.45.">07.211.05.45.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.47.">07.211.05.47.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.49.">07.211.05.49.</option>';
+            Code_Commu_options_str  += '<option value="07.211.05.51.">07.211.05.51.</option>';
+            Code_Commu_options_str  += '<option value="07.351.00.01.">07.351.00.01.</option>';
+            Code_Commu_options_str  += '<option value="07.351.01.01.">07.351.01.01.</option>';
+            Code_Commu_options_str  += '<option value="07.351.02.01.">07.351.02.01.</option>';
+            Code_Commu_options_str  += '<option value="07.351.02.07.">07.351.02.07.</option>';
+            Code_Commu_options_str  += '<option value="07.351.02.09.">07.351.02.09.</option>';
+            Code_Commu_options_str  += '<option value="07.351.03.03.">07.351.03.03.</option>';
+            Code_Commu_options_str  += '<option value="07.351.03.05.">07.351.03.05.</option>';
+            Code_Commu_options_str  += '<option value="07.351.03.11.">07.351.03.11.</option>';
+            Code_Commu_options_str  += '<option value="07.351.05.01.">07.351.05.01.</option>';
+            Code_Commu_options_str  += '<option value="07.351.05.03.">07.351.05.03.</option>';
+            Code_Commu_options_str  += '<option value="07.351.05.05.">07.351.05.05.</option>';
+            Code_Commu_options_str  += '<option value="07.351.05.09.">07.351.05.09.</option>';
+            Code_Commu_options_str  += '<option value="07.351.07.07.">07.351.07.07.</option>';
+            Code_Commu_options_str  += '<option value="07.351.07.11.">07.351.07.11.</option>';
+            Code_Commu_options_str  += '<option value="07.351.07.13.">07.351.07.13.</option>';
+            Code_Commu_options_str  += '<option value="07.427.01.01.">07.427.01.01.</option>';
+            Code_Commu_options_str  += '<option value="07.427.01.17.">07.427.01.17.</option>';
+            Code_Commu_options_str  += '<option value="07.427.07.01.">07.427.07.01.</option>';
+            Code_Commu_options_str  += '<option value="07.427.07.03.">07.427.07.03.</option>';
+            Code_Commu_options_str  += '<option value="07.427.07.05.">07.427.07.05.</option>';
+            Code_Commu_options_str  += '<option value="07.427.07.07.">07.427.07.07.</option>';
+            Code_Commu_options_str  += '<option value="07.427.07.09.">07.427.07.09.</option>';
+            Code_Commu_options_str  += '<option value="07.427.07.11.">07.427.07.11.</option>';
+            Code_Commu_options_str  += '<option value="07.427.07.13.">07.427.07.13.</option>';
+            Code_Commu_options_str  += '<option value="07.427.07.15.">07.427.07.15.</option>';
+            Code_Commu_options_str  += '<option value="07.427.07.17.">07.427.07.17.</option>';
+            Code_Commu_options_str  += '<option value="07.427.07.19.">07.427.07.19.</option>';
+            Code_Commu_options_str  += '<option value="07.427.07.21.">07.427.07.21.</option>';
+            Code_Commu_options_str  += '<option value="07.427.07.23.">07.427.07.23.</option>';
+            Code_Commu_options_str  += '<option value="07.427.07.25.">07.427.07.25.</option>';
+            Code_Commu_options_str  += '<option value="07.427.09.01.">07.427.09.01.</option>';
+            Code_Commu_options_str  += '<option value="07.427.09.03.">07.427.09.03.</option>';
+            Code_Commu_options_str  += '<option value="07.427.09.05.">07.427.09.05.</option>';
+            Code_Commu_options_str  += '<option value="07.427.09.06.">07.427.09.06.</option>';
+            Code_Commu_options_str  += '<option value="07.427.09.07.">07.427.09.07.</option>';
+            Code_Commu_options_str  += '<option value="07.427.09.09.">07.427.09.09.</option>';
+            Code_Commu_options_str  += '<option value="07.427.09.11.">07.427.09.11.</option>';
+            Code_Commu_options_str  += '<option value="07.427.09.13.">07.427.09.13.</option>';
+            Code_Commu_options_str  += '<option value="07.427.09.15.">07.427.09.15.</option>';
+            Code_Commu_options_str  += '<option value="07.427.09.19.">07.427.09.19.</option>';
+            Code_Commu_options_str  += '<option value="07.431.01.03.">07.431.01.03.</option>';
+            Code_Commu_options_str  += '<option value="07.431.01.09.">07.431.01.09.</option>';
+            Code_Commu_options_str  += '<option value="07.431.01.11.">07.431.01.11.</option>';
+            Code_Commu_options_str  += '<option value="07.431.03.01.">07.431.03.01.</option>';
+            Code_Commu_options_str  += '<option value="07.431.03.02.">07.431.03.02.</option>';
+            Code_Commu_options_str  += '<option value="07.431.03.03.">07.431.03.03.</option>';
+            Code_Commu_options_str  += '<option value="07.431.03.05.">07.431.03.05.</option>';
+            Code_Commu_options_str  += '<option value="07.431.03.07.">07.431.03.07.</option>';
+            Code_Commu_options_str  += '<option value="07.431.03.09.">07.431.03.09.</option>';
+            Code_Commu_options_str  += '<option value="07.431.03.11.">07.431.03.11.</option>';
+            Code_Commu_options_str  += '<option value="07.431.03.13.">07.431.03.13.</option>';
+            Code_Commu_options_str  += '<option value="07.431.03.15.">07.431.03.15.</option>';
+            Code_Commu_options_str  += '<option value="07.431.07.01.">07.431.07.01.</option>';
+            Code_Commu_options_str  += '<option value="07.431.07.03.">07.431.07.03.</option>';
+            Code_Commu_options_str  += '<option value="07.431.07.05.">07.431.07.05.</option>';
+            Code_Commu_options_str  += '<option value="07.431.07.07.">07.431.07.07.</option>';
+            Code_Commu_options_str  += '<option value="07.431.07.09.">07.431.07.09.</option>';
+            Code_Commu_options_str  += '<option value="07.431.07.11.">07.431.07.11.</option>';
+            Code_Commu_options_str  += '<option value="07.431.07.13.">07.431.07.13.</option>';
+            Code_Commu_options_str  += '<option value="07.431.09.01.">07.431.09.01.</option>';
+            Code_Commu_options_str  += '<option value="07.431.09.03.">07.431.09.03.</option>';
+            Code_Commu_options_str  += '<option value="07.431.09.05.">07.431.09.05.</option>';
+            Code_Commu_options_str  += '<option value="07.431.09.07.">07.431.09.07.</option>';
+            Code_Commu_options_str  += '<option value="07.431.09.09.">07.431.09.09.</option>';
+            Code_Commu_options_str  += '<option value="07.431.09.15.">07.431.09.15.</option>';
+            Code_Commu_options_str  += '<option value="07.585.01.07.">07.585.01.07.</option>';
+            Code_Commu_options_str  += '<option value="07.585.01.13.">07.585.01.13.</option>';
+            Code_Commu_options_str  += '<option value="07.585.05.07.">07.585.05.07.</option>';
+            Code_Commu_options_str  += '<option value="07.585.05.09.">07.585.05.09.</option>';
+            Code_Commu_options_str  += '<option value="07.585.05.11.">07.585.05.11.</option>';
+            Code_Commu_options_str  += '<option value="07.585.05.17.">07.585.05.17.</option>';
+            Code_Commu_options_str  += '<option value="07.585.07.01.">07.585.07.01.</option>';
+            Code_Commu_options_str  += '<option value="07.585.07.03.">07.585.07.03.</option>';
+            Code_Commu_options_str  += '<option value="07.585.07.05.">07.585.07.05.</option>';
+            Code_Commu_options_str  += '<option value="07.585.07.13.">07.585.07.13.</option>';
+            Code_Commu_options_str  += '<option value="07.585.07.15.">07.585.07.15.</option>';
+            Code_Commu_options_str  += '<option value="08.201.01.01.">08.201.01.01.</option>';
+            Code_Commu_options_str  += '<option value="08.201.01.03.">08.201.01.03.</option>';
+            Code_Commu_options_str  += '<option value="08.201.01.05.">08.201.01.05.</option>';
+            Code_Commu_options_str  += '<option value="08.201.01.09.">08.201.01.09.</option>';
+            Code_Commu_options_str  += '<option value="08.201.01.11.">08.201.01.11.</option>';
+            Code_Commu_options_str  += '<option value="08.201.01.13.">08.201.01.13.</option>';
+            Code_Commu_options_str  += '<option value="08.201.01.15.">08.201.01.15.</option>';
+            Code_Commu_options_str  += '<option value="08.201.03.01.">08.201.03.01.</option>';
+            Code_Commu_options_str  += '<option value="08.201.03.03.">08.201.03.03.</option>';
+            Code_Commu_options_str  += '<option value="08.201.03.07.">08.201.03.07.</option>';
+            Code_Commu_options_str  += '<option value="08.201.03.09.">08.201.03.09.</option>';
+            Code_Commu_options_str  += '<option value="08.201.07.01.">08.201.07.01.</option>';
+            Code_Commu_options_str  += '<option value="08.201.07.03.">08.201.07.03.</option>';
+            Code_Commu_options_str  += '<option value="08.201.07.05.">08.201.07.05.</option>';
+            Code_Commu_options_str  += '<option value="08.201.07.07.">08.201.07.07.</option>';
+            Code_Commu_options_str  += '<option value="08.201.07.09.">08.201.07.09.</option>';
+            Code_Commu_options_str  += '<option value="08.201.11.01.">08.201.11.01.</option>';
+            Code_Commu_options_str  += '<option value="08.201.11.03.">08.201.11.03.</option>';
+            Code_Commu_options_str  += '<option value="08.201.11.05.">08.201.11.05.</option>';
+            Code_Commu_options_str  += '<option value="08.201.11.07.">08.201.11.07.</option>';
+            Code_Commu_options_str  += '<option value="08.201.11.09.">08.201.11.09.</option>';
+            Code_Commu_options_str  += '<option value="08.201.13.01.">08.201.13.01.</option>';
+            Code_Commu_options_str  += '<option value="08.201.13.02.">08.201.13.02.</option>';
+            Code_Commu_options_str  += '<option value="08.201.13.03.">08.201.13.03.</option>';
+            Code_Commu_options_str  += '<option value="08.201.13.05.">08.201.13.05.</option>';
+            Code_Commu_options_str  += '<option value="08.201.13.07.">08.201.13.07.</option>';
+            Code_Commu_options_str  += '<option value="08.201.13.09.">08.201.13.09.</option>';
+            Code_Commu_options_str  += '<option value="08.201.13.11.">08.201.13.11.</option>';
+            Code_Commu_options_str  += '<option value="08.201.13.13.">08.201.13.13.</option>';
+            Code_Commu_options_str  += '<option value="08.363.01.03.">08.363.01.03.</option>';
+            Code_Commu_options_str  += '<option value="08.363.01.07.">08.363.01.07.</option>';
+            Code_Commu_options_str  += '<option value="08.363.05.01.">08.363.05.01.</option>';
+            Code_Commu_options_str  += '<option value="08.363.05.03.">08.363.05.03.</option>';
+            Code_Commu_options_str  += '<option value="08.363.05.13.">08.363.05.13.</option>';
+            Code_Commu_options_str  += '<option value="08.363.05.15.">08.363.05.15.</option>';
+            Code_Commu_options_str  += '<option value="08.363.05.21.">08.363.05.21.</option>';
+            Code_Commu_options_str  += '<option value="08.363.05.23.">08.363.05.23.</option>';
+            Code_Commu_options_str  += '<option value="08.363.05.25.">08.363.05.25.</option>';
+            Code_Commu_options_str  += '<option value="08.363.05.27.">08.363.05.27.</option>';
+            Code_Commu_options_str  += '<option value="08.363.07.05.">08.363.07.05.</option>';
+            Code_Commu_options_str  += '<option value="08.363.07.07.">08.363.07.07.</option>';
+            Code_Commu_options_str  += '<option value="08.363.07.09.">08.363.07.09.</option>';
+            Code_Commu_options_str  += '<option value="08.363.07.11.">08.363.07.11.</option>';
+            Code_Commu_options_str  += '<option value="08.363.07.17.">08.363.07.17.</option>';
+            Code_Commu_options_str  += '<option value="08.363.07.19.">08.363.07.19.</option>';
+            Code_Commu_options_str  += '<option value="08.363.07.29.">08.363.07.29.</option>';
+            Code_Commu_options_str  += '<option value="08.363.09.01.">08.363.09.01.</option>';
+            Code_Commu_options_str  += '<option value="08.363.09.03.">08.363.09.03.</option>';
+            Code_Commu_options_str  += '<option value="08.363.09.05.">08.363.09.05.</option>';
+            Code_Commu_options_str  += '<option value="08.363.09.07.">08.363.09.07.</option>';
+            Code_Commu_options_str  += '<option value="08.363.09.09.">08.363.09.09.</option>';
+            Code_Commu_options_str  += '<option value="08.363.09.11.">08.363.09.11.</option>';
+            Code_Commu_options_str  += '<option value="08.363.09.13.">08.363.09.13.</option>';
+            Code_Commu_options_str  += '<option value="08.363.15.01.">08.363.15.01.</option>';
+            Code_Commu_options_str  += '<option value="08.363.15.03.">08.363.15.03.</option>';
+            Code_Commu_options_str  += '<option value="08.363.15.05.">08.363.15.05.</option>';
+            Code_Commu_options_str  += '<option value="08.363.15.07.">08.363.15.07.</option>';
+            Code_Commu_options_str  += '<option value="08.363.15.09.">08.363.15.09.</option>';
+            Code_Commu_options_str  += '<option value="08.401.01.07.">08.401.01.07.</option>';
+            Code_Commu_options_str  += '<option value="08.401.01.09.">08.401.01.09.</option>';
+            Code_Commu_options_str  += '<option value="08.401.03.01.">08.401.03.01.</option>';
+            Code_Commu_options_str  += '<option value="08.401.03.03.">08.401.03.03.</option>';
+            Code_Commu_options_str  += '<option value="08.401.03.05.">08.401.03.05.</option>';
+            Code_Commu_options_str  += '<option value="08.401.03.07.">08.401.03.07.</option>';
+            Code_Commu_options_str  += '<option value="08.401.03.09.">08.401.03.09.</option>';
+            Code_Commu_options_str  += '<option value="08.401.03.11.">08.401.03.11.</option>';
+            Code_Commu_options_str  += '<option value="08.401.03.13.">08.401.03.13.</option>';
+            Code_Commu_options_str  += '<option value="08.401.03.15.">08.401.03.15.</option>';
+            Code_Commu_options_str  += '<option value="08.401.03.17.">08.401.03.17.</option>';
+            Code_Commu_options_str  += '<option value="08.401.07.01.">08.401.07.01.</option>';
+            Code_Commu_options_str  += '<option value="08.401.07.03.">08.401.07.03.</option>';
+            Code_Commu_options_str  += '<option value="08.401.07.05.">08.401.07.05.</option>';
+            Code_Commu_options_str  += '<option value="08.401.07.07.">08.401.07.07.</option>';
+            Code_Commu_options_str  += '<option value="08.401.07.09.">08.401.07.09.</option>';
+            Code_Commu_options_str  += '<option value="08.401.07.11.">08.401.07.11.</option>';
+            Code_Commu_options_str  += '<option value="08.577.01.03.">08.577.01.03.</option>';
+            Code_Commu_options_str  += '<option value="08.577.01.05.">08.577.01.05.</option>';
+            Code_Commu_options_str  += '<option value="08.577.01.11.">08.577.01.11.</option>';
+            Code_Commu_options_str  += '<option value="08.577.02.05.">08.577.02.05.</option>';
+            Code_Commu_options_str  += '<option value="08.577.02.11.">08.577.02.11.</option>';
+            Code_Commu_options_str  += '<option value="08.577.02.21.">08.577.02.21.</option>';
+            Code_Commu_options_str  += '<option value="08.577.03.01.">08.577.03.01.</option>';
+            Code_Commu_options_str  += '<option value="08.577.03.05.">08.577.03.05.</option>';
+            Code_Commu_options_str  += '<option value="08.577.05.03.">08.577.05.03.</option>';
+            Code_Commu_options_str  += '<option value="08.577.05.05.">08.577.05.05.</option>';
+            Code_Commu_options_str  += '<option value="08.577.05.07.">08.577.05.07.</option>';
+            Code_Commu_options_str  += '<option value="08.577.05.09.">08.577.05.09.</option>';
+            Code_Commu_options_str  += '<option value="08.577.05.11.">08.577.05.11.</option>';
+            Code_Commu_options_str  += '<option value="08.577.05.13.">08.577.05.13.</option>';
+            Code_Commu_options_str  += '<option value="08.577.05.15.">08.577.05.15.</option>';
+            Code_Commu_options_str  += '<option value="08.577.05.17.">08.577.05.17.</option>';
+            Code_Commu_options_str  += '<option value="08.577.05.21.">08.577.05.21.</option>';
+            Code_Commu_options_str  += '<option value="08.577.05.25.">08.577.05.25.</option>';
+            Code_Commu_options_str  += '<option value="08.577.05.29.">08.577.05.29.</option>';
+            Code_Commu_options_str  += '<option value="08.577.07.01.">08.577.07.01.</option>';
+            Code_Commu_options_str  += '<option value="08.577.07.19.">08.577.07.19.</option>';
+            Code_Commu_options_str  += '<option value="08.577.07.23.">08.577.07.23.</option>';
+            Code_Commu_options_str  += '<option value="08.577.07.27.">08.577.07.27.</option>';
+            Code_Commu_options_str  += '<option value="08.577.07.31.">08.577.07.31.</option>';
+            Code_Commu_options_str  += '<option value="08.577.07.33.">08.577.07.33.</option>';
+            Code_Commu_options_str  += '<option value="08.587.01.01.">08.587.01.01.</option>';
+            Code_Commu_options_str  += '<option value="08.587.01.13.">08.587.01.13.</option>';
+            Code_Commu_options_str  += '<option value="08.587.03.01.">08.587.03.01.</option>';
+            Code_Commu_options_str  += '<option value="08.587.03.03.">08.587.03.03.</option>';
+            Code_Commu_options_str  += '<option value="08.587.03.05.">08.587.03.05.</option>';
+            Code_Commu_options_str  += '<option value="08.587.03.07.">08.587.03.07.</option>';
+            Code_Commu_options_str  += '<option value="08.587.03.21.">08.587.03.21.</option>';
+            Code_Commu_options_str  += '<option value="08.587.03.25.">08.587.03.25.</option>';
+            Code_Commu_options_str  += '<option value="08.587.03.27.">08.587.03.27.</option>';
+            Code_Commu_options_str  += '<option value="08.587.03.31.">08.587.03.31.</option>';
+            Code_Commu_options_str  += '<option value="08.587.03.37.">08.587.03.37.</option>';
+            Code_Commu_options_str  += '<option value="08.587.03.39.">08.587.03.39.</option>';
+            Code_Commu_options_str  += '<option value="08.587.03.41.">08.587.03.41.</option>';
+            Code_Commu_options_str  += '<option value="08.587.07.09.">08.587.07.09.</option>';
+            Code_Commu_options_str  += '<option value="08.587.07.11.">08.587.07.11.</option>';
+            Code_Commu_options_str  += '<option value="08.587.07.13.">08.587.07.13.</option>';
+            Code_Commu_options_str  += '<option value="08.587.07.15.">08.587.07.15.</option>';
+            Code_Commu_options_str  += '<option value="08.587.07.29.">08.587.07.29.</option>';
+            Code_Commu_options_str  += '<option value="08.587.07.43.">08.587.07.43.</option>';
+            Code_Commu_options_str  += '<option value="08.587.07.45.">08.587.07.45.</option>';
+            Code_Commu_options_str  += '<option value="08.587.09.17.">08.587.09.17.</option>';
+            Code_Commu_options_str  += '<option value="08.587.09.19.">08.587.09.19.</option>';
+            Code_Commu_options_str  += '<option value="08.587.09.23.">08.587.09.23.</option>';
+            Code_Commu_options_str  += '<option value="08.587.09.33.">08.587.09.33.</option>';
+            Code_Commu_options_str  += '<option value="08.587.09.35.">08.587.09.35.</option>';
+            Code_Commu_options_str  += '<option value="09.001.01.01.">09.001.01.01.</option>';
+            Code_Commu_options_str  += '<option value="09.001.05.01.">09.001.05.01.</option>';
+            Code_Commu_options_str  += '<option value="09.001.05.09.">09.001.05.09.</option>';
+            Code_Commu_options_str  += '<option value="09.001.05.11.">09.001.05.11.</option>';
+            Code_Commu_options_str  += '<option value="09.001.07.03.">09.001.07.03.</option>';
+            Code_Commu_options_str  += '<option value="09.001.07.05.">09.001.07.05.</option>';
+            Code_Commu_options_str  += '<option value="09.001.07.07.">09.001.07.07.</option>';
+            Code_Commu_options_str  += '<option value="09.001.07.13.">09.001.07.13.</option>';
+            Code_Commu_options_str  += '<option value="09.001.07.15.">09.001.07.15.</option>';
+            Code_Commu_options_str  += '<option value="09.001.07.21.">09.001.07.21.</option>';
+            Code_Commu_options_str  += '<option value="09.001.07.23.">09.001.07.23.</option>';
+            Code_Commu_options_str  += '<option value="09.001.07.25.">09.001.07.25.</option>';
+            Code_Commu_options_str  += '<option value="09.001.07.29.">09.001.07.29.</option>';
+            Code_Commu_options_str  += '<option value="09.163.01.03.">09.163.01.03.</option>';
+            Code_Commu_options_str  += '<option value="09.163.01.11.">09.163.01.11.</option>';
+            Code_Commu_options_str  += '<option value="09.163.03.05.">09.163.03.05.</option>';
+            Code_Commu_options_str  += '<option value="09.163.03.07.">09.163.03.07.</option>';
+            Code_Commu_options_str  += '<option value="09.163.03.09.">09.163.03.09.</option>';
+            Code_Commu_options_str  += '<option value="09.163.03.13.">09.163.03.13.</option>';
+            Code_Commu_options_str  += '<option value="09.163.03.15.">09.163.03.15.</option>';
+            Code_Commu_options_str  += '<option value="09.163.03.25.">09.163.03.25.</option>';
+            Code_Commu_options_str  += '<option value="09.163.03.33.">09.163.03.33.</option>';
+            Code_Commu_options_str  += '<option value="09.163.03.35.">09.163.03.35.</option>';
+            Code_Commu_options_str  += '<option value="09.163.03.37.">09.163.03.37.</option>';
+            Code_Commu_options_str  += '<option value="09.163.03.39.">09.163.03.39.</option>';
+            Code_Commu_options_str  += '<option value="09.163.05.03.">09.163.05.03.</option>';
+            Code_Commu_options_str  += '<option value="09.163.05.11.">09.163.05.11.</option>';
+            Code_Commu_options_str  += '<option value="09.163.05.19.">09.163.05.19.</option>';
+            Code_Commu_options_str  += '<option value="09.163.05.21.">09.163.05.21.</option>';
+            Code_Commu_options_str  += '<option value="09.163.05.31.">09.163.05.31.</option>';
+            Code_Commu_options_str  += '<option value="09.163.07.01.">09.163.07.01.</option>';
+            Code_Commu_options_str  += '<option value="09.163.07.17.">09.163.07.17.</option>';
+            Code_Commu_options_str  += '<option value="09.163.07.23.">09.163.07.23.</option>';
+            Code_Commu_options_str  += '<option value="09.163.07.27.">09.163.07.27.</option>';
+            Code_Commu_options_str  += '<option value="09.163.07.29.">09.163.07.29.</option>';
+            Code_Commu_options_str  += '<option value="09.273.01.05.">09.273.01.05.</option>';
+            Code_Commu_options_str  += '<option value="09.273.01.13.">09.273.01.13.</option>';
+            Code_Commu_options_str  += '<option value="09.273.01.15.">09.273.01.15.</option>';
+            Code_Commu_options_str  += '<option value="09.273.01.17.">09.273.01.17.</option>';
+            Code_Commu_options_str  += '<option value="09.273.05.19.">09.273.05.19.</option>';
+            Code_Commu_options_str  += '<option value="09.273.05.27.">09.273.05.27.</option>';
+            Code_Commu_options_str  += '<option value="09.541.01.01.">09.541.01.01.</option>';
+            Code_Commu_options_str  += '<option value="09.541.01.02.">09.541.01.02.</option>';
+            Code_Commu_options_str  += '<option value="09.541.01.03.">09.541.01.03.</option>';
+            Code_Commu_options_str  += '<option value="09.541.01.05.">09.541.01.05.</option>';
+            Code_Commu_options_str  += '<option value="09.541.01.07.">09.541.01.07.</option>';
+            Code_Commu_options_str  += '<option value="09.541.01.09.">09.541.01.09.</option>';
+            Code_Commu_options_str  += '<option value="09.541.01.11.">09.541.01.11.</option>';
+            Code_Commu_options_str  += '<option value="09.541.01.13.">09.541.01.13.</option>';
+            Code_Commu_options_str  += '<option value="09.541.03.01.">09.541.03.01.</option>';
+            Code_Commu_options_str  += '<option value="09.541.03.03.">09.541.03.03.</option>';
+            Code_Commu_options_str  += '<option value="09.541.03.05.">09.541.03.05.</option>';
+            Code_Commu_options_str  += '<option value="09.541.03.07.">09.541.03.07.</option>';
+            Code_Commu_options_str  += '<option value="09.541.03.09.">09.541.03.09.</option>';
+            Code_Commu_options_str  += '<option value="09.541.03.11.">09.541.03.11.</option>';
+            Code_Commu_options_str  += '<option value="09.541.03.13.">09.541.03.13.</option>';
+            Code_Commu_options_str  += '<option value="09.541.03.15.">09.541.03.15.</option>';
+            Code_Commu_options_str  += '<option value="09.541.03.17.">09.541.03.17.</option>';
+            Code_Commu_options_str  += '<option value="09.541.03.19.">09.541.03.19.</option>';
+            Code_Commu_options_str  += '<option value="09.541.03.21.">09.541.03.21.</option>';
+            Code_Commu_options_str  += '<option value="09.541.03.23.">09.541.03.23.</option>';
+            Code_Commu_options_str  += '<option value="09.541.03.25.">09.541.03.25.</option>';
+            Code_Commu_options_str  += '<option value="09.541.03.27.">09.541.03.27.</option>';
+            Code_Commu_options_str  += '<option value="09.541.03.29.">09.541.03.29.</option>';
+            Code_Commu_options_str  += '<option value="09.541.03.31.">09.541.03.31.</option>';
+            Code_Commu_options_str  += '<option value="09.541.04.09.">09.541.04.09.</option>';
+            Code_Commu_options_str  += '<option value="09.541.04.13.">09.541.04.13.</option>';
+            Code_Commu_options_str  += '<option value="09.541.04.17.">09.541.04.17.</option>';
+            Code_Commu_options_str  += '<option value="09.541.04.21.">09.541.04.21.</option>';
+            Code_Commu_options_str  += '<option value="09.541.04.23.">09.541.04.23.</option>';
+            Code_Commu_options_str  += '<option value="09.541.04.25.">09.541.04.25.</option>';
+            Code_Commu_options_str  += '<option value="09.541.04.29.">09.541.04.29.</option>';
+            Code_Commu_options_str  += '<option value="09.541.04.33.">09.541.04.33.</option>';
+            Code_Commu_options_str  += '<option value="09.541.04.35.">09.541.04.35.</option>';
+            Code_Commu_options_str  += '<option value="09.541.04.39.">09.541.04.39.</option>';
+            Code_Commu_options_str  += '<option value="09.541.04.47.">09.541.04.47.</option>';
+            Code_Commu_options_str  += '<option value="09.541.04.49.">09.541.04.49.</option>';
+            Code_Commu_options_str  += '<option value="09.541.04.53.">09.541.04.53.</option>';
+            Code_Commu_options_str  += '<option value="09.541.04.59.">09.541.04.59.</option>';
+            Code_Commu_options_str  += '<option value="09.541.04.61.">09.541.04.61.</option>';
+            Code_Commu_options_str  += '<option value="09.541.04.67.">09.541.04.67.</option>';
+            Code_Commu_options_str  += '<option value="09.541.04.69.">09.541.04.69.</option>';
+            Code_Commu_options_str  += '<option value="09.541.05.01.">09.541.05.01.</option>';
+            Code_Commu_options_str  += '<option value="09.541.05.03.">09.541.05.03.</option>';
+            Code_Commu_options_str  += '<option value="09.541.05.05.">09.541.05.05.</option>';
+            Code_Commu_options_str  += '<option value="09.541.05.07.">09.541.05.07.</option>';
+            Code_Commu_options_str  += '<option value="09.541.05.09.">09.541.05.09.</option>';
+            Code_Commu_options_str  += '<option value="09.541.05.11.">09.541.05.11.</option>';
+            Code_Commu_options_str  += '<option value="09.541.05.13.">09.541.05.13.</option>';
+            Code_Commu_options_str  += '<option value="09.541.05.15.">09.541.05.15.</option>';
+            Code_Commu_options_str  += '<option value="09.541.05.17.">09.541.05.17.</option>';
+            Code_Commu_options_str  += '<option value="09.541.05.19.">09.541.05.19.</option>';
+            Code_Commu_options_str  += '<option value="09.541.05.21.">09.541.05.21.</option>';
+            Code_Commu_options_str  += '<option value="09.541.05.23.">09.541.05.23.</option>';
+            Code_Commu_options_str  += '<option value="09.541.05.25.">09.541.05.25.</option>';
+            Code_Commu_options_str  += '<option value="09.541.05.27.">09.541.05.27.</option>';
+            Code_Commu_options_str  += '<option value="09.541.05.29.">09.541.05.29.</option>';
+            Code_Commu_options_str  += '<option value="09.541.05.31.">09.541.05.31.</option>';
+            Code_Commu_options_str  += '<option value="09.541.05.33.">09.541.05.33.</option>';
+            Code_Commu_options_str  += '<option value="09.541.07.01.">09.541.07.01.</option>';
+            Code_Commu_options_str  += '<option value="09.541.07.03.">09.541.07.03.</option>';
+            Code_Commu_options_str  += '<option value="09.541.07.05.">09.541.07.05.</option>';
+            Code_Commu_options_str  += '<option value="09.541.07.07.">09.541.07.07.</option>';
+            Code_Commu_options_str  += '<option value="09.541.07.09.">09.541.07.09.</option>';
+            Code_Commu_options_str  += '<option value="09.541.07.11.">09.541.07.11.</option>';
+            Code_Commu_options_str  += '<option value="09.541.07.13.">09.541.07.13.</option>';
+            Code_Commu_options_str  += '<option value="09.541.07.15.">09.541.07.15.</option>';
+            Code_Commu_options_str  += '<option value="09.541.07.17.">09.541.07.17.</option>';
+            Code_Commu_options_str  += '<option value="09.541.07.19.">09.541.07.19.</option>';
+            Code_Commu_options_str  += '<option value="09.541.07.21.">09.541.07.21.</option>';
+            Code_Commu_options_str  += '<option value="09.541.07.23.">09.541.07.23.</option>';
+            Code_Commu_options_str  += '<option value="09.541.07.25.">09.541.07.25.</option>';
+            Code_Commu_options_str  += '<option value="09.541.07.37.">09.541.07.37.</option>';
+            Code_Commu_options_str  += '<option value="09.541.07.65.">09.541.07.65.</option>';
+            Code_Commu_options_str  += '<option value="09.541.09.01.">09.541.09.01.</option>';
+            Code_Commu_options_str  += '<option value="09.541.09.03.">09.541.09.03.</option>';
+            Code_Commu_options_str  += '<option value="09.541.09.05.">09.541.09.05.</option>';
+            Code_Commu_options_str  += '<option value="09.541.09.11.">09.541.09.11.</option>';
+            Code_Commu_options_str  += '<option value="09.541.09.15.">09.541.09.15.</option>';
+            Code_Commu_options_str  += '<option value="09.541.09.19.">09.541.09.19.</option>';
+            Code_Commu_options_str  += '<option value="09.541.09.27.">09.541.09.27.</option>';
+            Code_Commu_options_str  += '<option value="09.541.09.31.">09.541.09.31.</option>';
+            Code_Commu_options_str  += '<option value="09.541.09.41.">09.541.09.41.</option>';
+            Code_Commu_options_str  += '<option value="09.541.09.43.">09.541.09.43.</option>';
+            Code_Commu_options_str  += '<option value="09.541.09.45.">09.541.09.45.</option>';
+            Code_Commu_options_str  += '<option value="09.541.09.51.">09.541.09.51.</option>';
+            Code_Commu_options_str  += '<option value="09.541.09.55.">09.541.09.55.</option>';
+            Code_Commu_options_str  += '<option value="09.541.09.57.">09.541.09.57.</option>';
+            Code_Commu_options_str  += '<option value="09.541.09.63.">09.541.09.63.</option>';
+            Code_Commu_options_str  += '<option value="09.541.09.71.">09.541.09.71.</option>';
+            Code_Commu_options_str  += '<option value="09.551.01.01.">09.551.01.01.</option>';
+            Code_Commu_options_str  += '<option value="09.551.01.03.">09.551.01.03.</option>';
+            Code_Commu_options_str  += '<option value="09.551.01.05.">09.551.01.05.</option>';
+            Code_Commu_options_str  += '<option value="09.551.01.07.">09.551.01.07.</option>';
+            Code_Commu_options_str  += '<option value="09.551.03.01.">09.551.03.01.</option>';
+            Code_Commu_options_str  += '<option value="09.551.03.03.">09.551.03.03.</option>';
+            Code_Commu_options_str  += '<option value="09.551.03.05.">09.551.03.05.</option>';
+            Code_Commu_options_str  += '<option value="09.551.03.07.">09.551.03.07.</option>';
+            Code_Commu_options_str  += '<option value="09.551.05.01.">09.551.05.01.</option>';
+            Code_Commu_options_str  += '<option value="09.551.05.03.">09.551.05.03.</option>';
+            Code_Commu_options_str  += '<option value="09.551.05.05.">09.551.05.05.</option>';
+            Code_Commu_options_str  += '<option value="09.551.05.07.">09.551.05.07.</option>';
+            Code_Commu_options_str  += '<option value="09.551.05.09.">09.551.05.09.</option>';
+            Code_Commu_options_str  += '<option value="09.551.05.11.">09.551.05.11.</option>';
+            Code_Commu_options_str  += '<option value="09.551.07.01.">09.551.07.01.</option>';
+            Code_Commu_options_str  += '<option value="09.551.07.03.">09.551.07.03.</option>';
+            Code_Commu_options_str  += '<option value="09.551.07.05.">09.551.07.05.</option>';
+            Code_Commu_options_str  += '<option value="09.551.07.07.">09.551.07.07.</option>';
+            Code_Commu_options_str  += '<option value="09.551.07.09.">09.551.07.09.</option>';
+            Code_Commu_options_str  += '<option value="09.551.07.11.">09.551.07.11.</option>';
+            Code_Commu_options_str  += '<option value="09.581.01.05.">09.581.01.05.</option>';
+            Code_Commu_options_str  += '<option value="09.581.01.07.">09.581.01.07.</option>';
+            Code_Commu_options_str  += '<option value="09.581.03.01.">09.581.03.01.</option>';
+            Code_Commu_options_str  += '<option value="09.581.03.03.">09.581.03.03.</option>';
+            Code_Commu_options_str  += '<option value="09.581.03.05.">09.581.03.05.</option>';
+            Code_Commu_options_str  += '<option value="09.581.03.07.">09.581.03.07.</option>';
+            Code_Commu_options_str  += '<option value="09.581.03.09.">09.581.03.09.</option>';
+            Code_Commu_options_str  += '<option value="09.581.03.11.">09.581.03.11.</option>';
+            Code_Commu_options_str  += '<option value="09.581.03.13.">09.581.03.13.</option>';
+            Code_Commu_options_str  += '<option value="09.581.03.15.">09.581.03.15.</option>';
+            Code_Commu_options_str  += '<option value="09.581.03.17.">09.581.03.17.</option>';
+            Code_Commu_options_str  += '<option value="09.581.09.01.">09.581.09.01.</option>';
+            Code_Commu_options_str  += '<option value="09.581.09.03.">09.581.09.03.</option>';
+            Code_Commu_options_str  += '<option value="09.581.09.05.">09.581.09.05.</option>';
+            Code_Commu_options_str  += '<option value="09.581.09.07.">09.581.09.07.</option>';
+            Code_Commu_options_str  += '<option value="09.581.09.09.">09.581.09.09.</option>';
+            Code_Commu_options_str  += '<option value="09.581.09.11.">09.581.09.11.</option>';
+            Code_Commu_options_str  += '<option value="09.581.11.01.">09.581.11.01.</option>';
+            Code_Commu_options_str  += '<option value="09.581.11.03.">09.581.11.03.</option>';
+            Code_Commu_options_str  += '<option value="09.581.11.05.">09.581.11.05.</option>';
+            Code_Commu_options_str  += '<option value="09.581.11.07.">09.581.11.07.</option>';
+            Code_Commu_options_str  += '<option value="09.581.11.09.">09.581.11.09.</option>';
+            Code_Commu_options_str  += '<option value="09.581.11.11.">09.581.11.11.</option>';
+            Code_Commu_options_str  += '<option value="09.581.11.13.">09.581.11.13.</option>';
+            Code_Commu_options_str  += '<option value="09.581.11.15.">09.581.11.15.</option>';
+            Code_Commu_options_str  += '<option value="10.071.01.01.">10.071.01.01.</option>';
+            Code_Commu_options_str  += '<option value="10.071.01.03.">10.071.01.03.</option>';
+            Code_Commu_options_str  += '<option value="10.071.03.01.">10.071.03.01.</option>';
+            Code_Commu_options_str  += '<option value="10.071.03.03.">10.071.03.03.</option>';
+            Code_Commu_options_str  += '<option value="10.071.03.05.">10.071.03.05.</option>';
+            Code_Commu_options_str  += '<option value="10.071.05.01.">10.071.05.01.</option>';
+            Code_Commu_options_str  += '<option value="10.071.05.03.">10.071.05.03.</option>';
+            Code_Commu_options_str  += '<option value="10.261.01.01.">10.261.01.01.</option>';
+            Code_Commu_options_str  += '<option value="10.261.01.03.">10.261.01.03.</option>';
+            Code_Commu_options_str  += '<option value="10.261.03.01.">10.261.03.01.</option>';
+            Code_Commu_options_str  += '<option value="10.261.03.03.">10.261.03.03.</option>';
+            Code_Commu_options_str  += '<option value="10.261.03.05.">10.261.03.05.</option>';
+            Code_Commu_options_str  += '<option value="10.261.03.07.">10.261.03.07.</option>';
+            Code_Commu_options_str  += '<option value="10.261.03.09.">10.261.03.09.</option>';
+            Code_Commu_options_str  += '<option value="10.261.03.11.">10.261.03.11.</option>';
+            Code_Commu_options_str  += '<option value="10.261.03.13.">10.261.03.13.</option>';
+            Code_Commu_options_str  += '<option value="10.261.05.03.">10.261.05.03.</option>';
+            Code_Commu_options_str  += '<option value="10.261.05.05.">10.261.05.05.</option>';
+            Code_Commu_options_str  += '<option value="10.261.05.09.">10.261.05.09.</option>';
+            Code_Commu_options_str  += '<option value="10.261.05.21.">10.261.05.21.</option>';
+            Code_Commu_options_str  += '<option value="10.261.07.01.">10.261.07.01.</option>';
+            Code_Commu_options_str  += '<option value="10.261.07.07.">10.261.07.07.</option>';
+            Code_Commu_options_str  += '<option value="10.261.07.11.">10.261.07.11.</option>';
+            Code_Commu_options_str  += '<option value="10.261.07.13.">10.261.07.13.</option>';
+            Code_Commu_options_str  += '<option value="10.261.07.15.">10.261.07.15.</option>';
+            Code_Commu_options_str  += '<option value="10.261.07.17.">10.261.07.17.</option>';
+            Code_Commu_options_str  += '<option value="10.261.07.19.">10.261.07.19.</option>';
+            Code_Commu_options_str  += '<option value="10.473.01.01.">10.473.01.01.</option>';
+            Code_Commu_options_str  += '<option value="10.473.01.03.">10.473.01.03.</option>';
+            Code_Commu_options_str  += '<option value="10.473.05.01.">10.473.05.01.</option>';
+            Code_Commu_options_str  += '<option value="10.473.05.03.">10.473.05.03.</option>';
+            Code_Commu_options_str  += '<option value="10.473.05.05.">10.473.05.05.</option>';
+            Code_Commu_options_str  += '<option value="10.473.05.07.">10.473.05.07.</option>';
+            Code_Commu_options_str  += '<option value="10.473.05.09.">10.473.05.09.</option>';
+            Code_Commu_options_str  += '<option value="10.473.05.11.">10.473.05.11.</option>';
+            Code_Commu_options_str  += '<option value="10.473.05.13.">10.473.05.13.</option>';
+            Code_Commu_options_str  += '<option value="10.473.05.15.">10.473.05.15.</option>';
+            Code_Commu_options_str  += '<option value="10.473.07.01.">10.473.07.01.</option>';
+            Code_Commu_options_str  += '<option value="10.473.07.03.">10.473.07.03.</option>';
+            Code_Commu_options_str  += '<option value="10.473.07.05.">10.473.07.05.</option>';
+            Code_Commu_options_str  += '<option value="10.473.07.07.">10.473.07.07.</option>';
+            Code_Commu_options_str  += '<option value="10.473.07.09.">10.473.07.09.</option>';
+            Code_Commu_options_str  += '<option value="10.473.07.11.">10.473.07.11.</option>';
+            Code_Commu_options_str  += '<option value="10.473.07.13.">10.473.07.13.</option>';
+            Code_Commu_options_str  += '<option value="10.473.07.15.">10.473.07.15.</option>';
+            Code_Commu_options_str  += '<option value="10.473.07.17.">10.473.07.17.</option>';
+            Code_Commu_options_str  += '<option value="10.521.01.01.">10.521.01.01.</option>';
+            Code_Commu_options_str  += '<option value="10.521.01.03.">10.521.01.03.</option>';
+            Code_Commu_options_str  += '<option value="10.521.03.01.">10.521.03.01.</option>';
+            Code_Commu_options_str  += '<option value="10.521.03.03.">10.521.03.03.</option>';
+            Code_Commu_options_str  += '<option value="10.521.05.01.">10.521.05.01.</option>';
+            Code_Commu_options_str  += '<option value="10.521.05.03.">10.521.05.03.</option>';
+            Code_Commu_options_str  += '<option value="10.521.05.05.">10.521.05.05.</option>';
+            Code_Commu_options_str  += '<option value="11.121.01.01.">11.121.01.01.</option>';
+            Code_Commu_options_str  += '<option value="11.121.03.01.">11.121.03.01.</option>';
+            Code_Commu_options_str  += '<option value="11.121.03.03.">11.121.03.03.</option>';
+            Code_Commu_options_str  += '<option value="11.121.03.05.">11.121.03.05.</option>';
+            Code_Commu_options_str  += '<option value="11.221.01.01.">11.221.01.01.</option>';
+            Code_Commu_options_str  += '<option value="11.221.03.01.">11.221.03.01.</option>';
+            Code_Commu_options_str  += '<option value="11.221.03.03.">11.221.03.03.</option>';
+            Code_Commu_options_str  += '<option value="11.221.03.05.">11.221.03.05.</option>';
+            Code_Commu_options_str  += '<option value="11.221.03.07.">11.221.03.07.</option>';
+            Code_Commu_options_str  += '<option value="11.221.03.09.">11.221.03.09.</option>';
+            Code_Commu_options_str  += '<option value="11.321.01.01.">11.321.01.01.</option>';
+            Code_Commu_options_str  += '<option value="11.321.01.03.">11.321.01.03.</option>';
+            Code_Commu_options_str  += '<option value="11.321.03.01.">11.321.03.01.</option>';
+            Code_Commu_options_str  += '<option value="11.321.03.03.">11.321.03.03.</option>';
+            Code_Commu_options_str  += '<option value="11.321.03.05.">11.321.03.05.</option>';
+            Code_Commu_options_str  += '<option value="11.537.01.05.">11.537.01.05.</option>';
+            Code_Commu_options_str  += '<option value="11.537.03.03.">11.537.03.03.</option>';
+            Code_Commu_options_str  += '<option value="11.537.03.05.">11.537.03.05.</option>';
+            Code_Commu_options_str  += '<option value="11.537.05.01.">11.537.05.01.</option>';
+            Code_Commu_options_str  += '<option value="11.537.05.07.">11.537.05.07.</option>';
+            Code_Commu_options_str  += '<option value="12.066.01.03.">12.066.01.03.</option>';
+            Code_Commu_options_str  += '<option value="12.066.03.03.">12.066.03.03.</option>';
+            Code_Commu_options_str  += '<option value="12.066.03.05.">12.066.03.05.</option>';
+            Code_Commu_options_str  += '<option value="12.066.03.07.">12.066.03.07.</option>';
+            Code_Commu_options_str  += '<option value="12.066.03.09.">12.066.03.09.</option>';
+            Code_Commu_options_str  += '<option value="12.066.05.03.">12.066.05.03.</option>';
+            Code_Commu_options_str  += '<option value="12.391.01.01.">12.391.01.01.</option>';
+            Code_Commu_options_str  += '<option value="12.391.05.01.">12.391.05.01.</option>';
+            Code_Commu_options_str  += '<option value="12.391.05.03.">12.391.05.03.</option>';
+            Code_Commu_options_str  += '<option value="12.391.05.05.">12.391.05.05.</option>';
+            Code_Commu_options_str  += '<option value="12.391.05.07.">12.391.05.07.</option>';
+            Code_Commu_options_str  += '<option value="12.391.09.01.">12.391.09.01.</option>';
+            Code_Commu_options_str  += '<option value="12.391.09.03.">12.391.09.03.</option>';
+            sel_Code_Commu.innerHTML = Code_Commu_options_str;
+            div_Code_Commu.appendChild(sel_Code_Commu);
+            var lab_Code_Commu = document.createElement('div');
+            lab_Code_Commu.innerHTML = 'Code de la Commune';
+            lab_Code_Commu.className = 'filterlabel';
+            div_Code_Commu.appendChild(lab_Code_Commu);
+            var reset_Code_Commu = document.createElement('div');
+            reset_Code_Commu.innerHTML = 'Eliminer le filtre';
+            reset_Code_Commu.className = 'filterlabel';
+            reset_Code_Commu.onclick = function() {
+                var options = document.getElementById("sel_Code_Commu").options;
+                for (var i=0; i < options.length; i++) {
+                    options[i].selected = false;
+                }
+                filterFunc();
+            };
+            div_Code_Commu.appendChild(reset_Code_Commu);
+        </script>
+    </body>
+</html>
